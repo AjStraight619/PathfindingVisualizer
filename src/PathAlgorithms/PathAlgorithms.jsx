@@ -22,7 +22,7 @@ import Tutorial from "../Tutorial/Tutorial";
 import { bestFirstSearch } from "../Algorithms/bestFirstSearch";
 
 const START_NODE_ROW = 15;
-const START_NODE_COL = 15;
+const START_NODE_COL = 8;
 const FINISH_NODE_ROW = 15;
 const FINISH_NODE_COL = 47;
 
