@@ -45,7 +45,7 @@ export default class PathFinding extends Component {
       curMaze: "",
       maze: null,
       startingNode: true,
-      startNode: { row: 15, col: 15 },
+      startNode: { row: 15, col: 8 },
       finishNode: { row: 15, col: 47 },
       dragType: null,
       currentStartNode: null,
