@@ -1,0 +1,211 @@
+import React, { useState } from "react";
+import "./tutorial.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
+
+export default function Tutorial(props) {
+  const [page, setPage] = useState(1);
+
+  const handleNextPage = () => {
+    if (page < 6) setPage(page + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (page > 1) setPage(page - 1);
+  };
+
+  const handleAboutAlgorithms = () => {
+    setPage(5);
+  };
+
+  return (
+    <div className="tutorial">
+      <div className="tutorial-content">
+        <div className="tutorial-header">
+          <h2>Pathfinding Visualizer Tutorial</h2>
+          <button className="tutorial-close-button" onClick={props.onClose}>
+            Close
+          </button>
+        </div>
+        {page === 1 && (
+          <div>
+            <h3>Step 1: Introduction</h3>
+            <p>
+              Welcome to the Pathfinding Visualizer! This tool allows you to
+              visualize different pathfinding algorithms in action. You can
+              choose from several algorithms and maze generation algorithms to
+              experiment with.
+            </p>
+            <button className="tutorial-next-button" onClick={handleNextPage}>
+              Next
+            </button>
+          </div>
+        )}
+        {page === 2 && (
+          <div>
+            <h3>Step 2: Creating Walls</h3>
+            <p>
+              Walls are obstacles that cannot be crossed by the pathfinding
+              algorithm. To create a wall, simply click and drag over the grid
+              cells. To remove a wall, click and drag over the wall again.
+            </p>
+            <button className="tutorial-prev-button" onClick={handlePrevPage}>
+              Prev
+            </button>
+            <button className="tutorial-next-button" onClick={handleNextPage}>
+              Next
+            </button>
+          </div>
+        )}
+        {page === 3 && (
+          <div>
+            <h3>Step 3: Choosing an Algorithm</h3>
+            <p>
+              You can choose from several different pathfinding algorithms to
+              visualize, including Dijkstra's Algorithm, A*, Breadth-First
+              Search, and Depth-First Search. To choose an algorithm, click on
+              the "Choose an Algorithm!" dropdown in the navbar and select your
+              desired algorithm.
+            </p>
+            <button className="tutorial-prev-button" onClick={handlePrevPage}>
+              Prev
+            </button>
+            <button className="tutorial-next-button" onClick={handleNextPage}>
+              Next
+            </button>
+          </div>
+        )}
+        {page === 4 && (
+          <div>
+            <h3>Step 4: Choosing a Maze</h3>
+            <p>
+              You can also choose from several different maze generation
+              algorithms, including Recursive Division and Random Maze. To
+              choose a maze, click on the "Choose a Maze!" dropdown in the
+              navbar and select your desired maze algorithm.
+            </p>
+            <button className="tutorial-prev-button" onClick={handlePrevPage}>
+              Prev
+            </button>
+            <button className="tutorial-next-button" onClick={handleNextPage}>
+              Next
+            </button>
+          </div>
+        )}
+        {page === 5 && (
+          <div>
+            <h3>Step 5: Adjusting Speed</h3>
+            <p>
+              You can adjust the speed of the pathfinding visualization by
+              selecting a speed from the "Speed" dropdown in the navbar. The
+              available speed options are Fast, Medium, and Slow.
+            </p>
+            <div className="tutorial-arrows">
+              <FontAwesomeIcon icon={faChevronLeft} onClick={handlePrevPage} />
+              <FontAwesomeIcon icon={faChevronRight} onClick={handleNextPage} />
+            </div>
+            <button className="tutorial-prev-button" onClick={handlePrevPage}>
+              Prev
+            </button>
+            <button className="tutorial-next-button" onClick={handleNextPage}>
+              Next
+            </button>
+          </div>
+        )}
+
+        {page === 6 && (
+          <div>
+            <h3>About the Algorithms</h3>
+            <p>
+              There are four algorithms implemented in this pathfinding
+              visualizer: Dijkstra's Algorithm, A*, Breadth-First Search, and
+              Depth-First Search.
+            </p>
+            <h4>Dijkstra's Algorithm:</h4>
+            <p>
+              Dijkstra's Algorithm is a weighted graph search algorithm that
+              calculates the shortest path between the start node and all other
+              nodes in a graph. It does this by maintaining a set of unvisited
+              nodes and selecting the node with the shortest distance from the
+              start node as the current node. It then examines all the neighbors
+              of the current node and updates their distances if a shorter path
+              is found. This process continues until the destination node is
+              reached or all reachable nodes have been visited.
+            </p>
+            <h4>A* Algorithm:</h4>
+            <p>
+              A* Algorithm is a heuristic search algorithm that is similar to
+              Dijkstra's Algorithm, but also takes into account an estimate of
+              the remaining distance from a node to the destination. This
+              estimate is called the heuristic, and is used to guide the search
+              towards the goal node. A* Algorithm is considered a best-first
+              search algorithm because it always selects the node that appears
+              to be closest to the goal, based on the sum of the distance from
+              the start node to the current node and the heuristic estimate of
+              the remaining distance to the goal.
+            </p>
+            <h4>Breadth-First Search:</h4>
+            <p>
+              Breadth-First Search is an algorithm that explores all the
+              vertices of a graph that are at the same distance from the
+              starting vertex before exploring vertices that are farther away.
+              It starts at the starting vertex and visits all the vertices at
+              distance 1, then all the vertices at distance 2, and so on, until
+              the goal vertex is found.
+            </p>
+            <h4>Depth-First Search:</h4>
+            <p>
+              Depth-First Search is an algorithm that explores as far as
+              possible along each branch before backtracking. It starts at the
+              starting vertex and explores as far as possible along each branch
+              before backtracking to explore other branches. It continues this
+              process until the goal vertex is found or all reachable vertices
+              have been explored.
+            </p>
+
+            <h4>Best-first Search:</h4>
+            <p>
+              Best-First Search is a search algorithm that aims to find the
+              optimal path from a starting node to a goal node in a graph or a
+              network. This algorithm explores the graph in a greedy manner, by
+              always choosing the next node that seems to be closest to the goal
+              node, according to some heuristic function.
+            </p>
+            <h4>Biderectional Greedy: *currently working on debugging*</h4>
+            <p>
+              Bidirectional Greedy Best-First Search is a variant of the
+              Best-First Search algorithm that simultaneously searches from both
+              the start and the goal nodes towards their common meeting point.
+              It expands the nodes with the lowest heuristic values, i.e., the
+              nodes that are closest to the meeting point, in each direction. By
+              running the search simultaneously from both directions, the
+              algorithm can quickly identify the shortest path between the start
+              and goal nodes.
+            </p>
+            <h4>Random Search:</h4>
+            <p>
+              The random search algorithm is a type of uninformed search
+              algorithm that explores a search space by randomly selecting
+              unvisited nodes as the next nodes to visit. In this
+              implementation, the algorithm starts at the given start node, adds
+              its unvisited neighbors to a queue, and randomly shuffles the
+              queue before selecting the next node to visit. The process
+              continues until the finish node is reached or all nodes have been
+              visited. The algorithm returns the visited nodes in the order they
+              were explored.
+            </p>
+            <button className="tutorial-close-button" onClick={props.onClose}>
+              Close
+            </button>
+            <button className="tutorial-prev-button" onClick={handlePrevPage}>
+              Prev
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
