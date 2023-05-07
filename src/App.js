@@ -1,42 +1,19 @@
+import "./App.css";
+import { ReactFragment } from "react";
+import PathAlgorithms from "./PathAlgorithms/PathAlgorithms";
 
-import './App.css';
-import { ReactFragment } from 'react';
-import PathAlgorithms from './PathAlgorithms/PathAlgorithms';
+import { VscTriangleDown } from "react-icons";
 
-import {VscTriangleDown} from "react-icons";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-
-import 'bootstrap/dist/css/bootstrap.min.css';
-
-
-import React from 'react';
-
-
-
-
-
-
-
-
-
-
-
-
+import React from "react";
 
 function App() {
   return (
-    <div className= "App">
-
-    
-     
-     <PathAlgorithms></PathAlgorithms>
-      
-      
-     
-      </div>
+    <div className="App">
+      <PathAlgorithms></PathAlgorithms>
+    </div>
   );
 }
-
-
 
 export default App;

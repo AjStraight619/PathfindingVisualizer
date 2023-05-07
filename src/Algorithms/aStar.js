@@ -1,50 +1,40 @@
 export function aStar(grid, startNode, finishNode) {
   const openSet = [];
   const closedSet = [];
-  let isReachable = false;
   openSet.push(startNode);
   startNode.f = heuristic(startNode, finishNode);
-
+  // infinite loop until we find finishNode or trapped or all nodes have been explored.
   while (openSet.length > 0) {
     let lowestIndex = 0;
-    
+
     for (let i = 0; i < openSet.length; i++) {
       if (openSet[i].f < openSet[lowestIndex].f) lowestIndex = i;
     }
     let currentNode = openSet[lowestIndex];
-
+    // if the current node is a wall, skip it
     if (currentNode.isWall) continue;
-        // If the closest node is at a distance of infinity,
-        // we must be trapped and should therefore stop.
-        if (currentNode.f === Infinity) {
-          return [];
-        }
-
+    // if the current node's .f is infinity we must be trapped.
+    if (currentNode.f === Infinity) {
+      return [];
+    }
+    // else currentNode.isVisited = true;
     currentNode.isVisited = true;
 
-    // if (currentNode === finishNode) {
-    //   return closedSet; // return every node visted.
-    // }
-
+    // if we have reached the finish node, break and return visited nodes in order.
     if (currentNode === finishNode) {
-      isReachable = true;
       break;
     }
 
     removeFromArray(openSet, currentNode);
-
-    
-
     closedSet.push(currentNode);
 
     const neighbors = getUnvisitedNeighbors(currentNode, grid);
-    console.log("got neighbors array");
-    console.log(neighbors.length);
+    // if neighbor is not in the closedSet, and it is not a wall, we have not explored it yet and need to calculate the f value of the node.
     for (let i = 0; i < neighbors.length; i++) {
       const neighbor = neighbors[i];
 
       if (!closedSet.includes(neighbor) && !neighbor.isWall) {
-        let tempG = currentNode.g + 1;
+        let tempG = currentNode.g + neighbor.weight;
         if (openSet.includes(neighbor)) {
           if (tempG < neighbor.g) {
             neighbor.g = tempG;
@@ -59,12 +49,9 @@ export function aStar(grid, startNode, finishNode) {
         neighbor.previousNode = currentNode; // keeping track of its parent node
       }
     }
-   
-  
   }
   return closedSet;
 }
-
 
 export function getNodesInShortestPathOrder(finishNode) {
   const nodesInShortestPathOrder = [];
@@ -73,6 +60,7 @@ export function getNodesInShortestPathOrder(finishNode) {
     nodesInShortestPathOrder.unshift(currentNode);
     currentNode = currentNode.previousNode ? currentNode.previousNode : null;
   }
+
   return nodesInShortestPathOrder;
 }
 
@@ -83,7 +71,7 @@ function removeFromArray(openSet, currentNode) {
     }
   }
 }
-
+// get all unvisited neighbors, exluding diagonal neighbors and return the neighbors that have no been visited.
 function getUnvisitedNeighbors(node, grid) {
   const neighbors = [];
 
@@ -101,14 +89,13 @@ function getUnvisitedNeighbors(node, grid) {
   if (col < grid[0].length - 1) {
     neighbors.push(grid[row][col + 1]);
   }
-  for (let i = 0; i < neighbors.length; i++) {
-    console.log(neighbors[i]);
-  }
   return neighbors.filter((neighbor) => !neighbor.isVisited);
 }
 
+// simple heuristic function to calculate the distance current node to the finish node.
 function heuristic(neighborNode, finishNode) {
-  let d1 = Math.abs(finishNode.row - neighborNode.row);
-  let d2 = Math.abs(finishNode.col - neighborNode.col);
-  return d1 + d2;
+  const dx = Math.abs(finishNode.row - neighborNode.row);
+  const dy = Math.abs(finishNode.col - neighborNode.col);
+
+  return dx + dy + neighborNode.weight;
 }

@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import "./Node.css";
+import { FiAnchor, FiChevronRight, FiCrosshair } from "react-icons/fi";
 
 export default class Node extends Component {
-  // Add the new methods here
   handleDrag = (e) => {
     e.preventDefault();
     this.props.onDrag();
@@ -15,13 +15,16 @@ export default class Node extends Component {
 
   render() {
     const {
+      className, // add this prop
       col,
       row,
       isStart,
       isFinish,
       isWall,
+      isWeight,
       isDraggable,
-      isDragging, // Add the isDragging prop
+      isDragging,
+      isCurrent,
       onMouseDown,
       onMouseUp,
       onMouseEnter,
@@ -36,14 +39,22 @@ export default class Node extends Component {
       ? "node-start"
       : isWall
       ? "node-wall"
-      : " ";
+      : isWeight
+      ? "node-weight"
+      : this.props.visited
+      ? "node-visited"
+      : this.props.shortestPath
+      ? "node-shortest-path"
+      : isCurrent
+      ? "node-current"
+      : "";
 
     const nodeClasses = `node ${extra} ${isDragging ? "dragging" : ""}`;
 
     return (
       <div
         id={`node-${row}-${col}`}
-        className={nodeClasses}
+        className={`${className} ${nodeClasses}${isDragging ? "dragging" : ""}`}
         draggable={isDraggable}
         onMouseDown={() => onMouseDown(row, col)}
         onMouseEnter={() => onMouseEnter(row, col)}
@@ -51,13 +62,11 @@ export default class Node extends Component {
         onDragStart={(e) => onDragStart(e, row, col)}
         onDragOver={(e) => onDragOver(e)}
         onDrop={(e) => onDrop(e, row, col)}
-        onDrag={this.handleDrag} // Add the onDrag event handler
-        onDragEnd={this.handleDragEnd} // Add the onDragEnd event handler
       >
-        {this.props.children}
+        {isWeight ? <FiAnchor className="weight-icon" /> : null}
+        {isStart ? <FiChevronRight className="start-icon" /> : null}
+        {isFinish ? <FiCrosshair className="finish-icon" /> : null}
       </div>
     );
   }
 }
-
-

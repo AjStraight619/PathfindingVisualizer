@@ -10,7 +10,7 @@ export default function Tutorial(props) {
   const [page, setPage] = useState(1);
 
   const handleNextPage = () => {
-    if (page < 6) setPage(page + 1);
+    if (page < 8) setPage(page + 1);
   };
 
   const handlePrevPage = () => {
@@ -46,11 +46,21 @@ export default function Tutorial(props) {
         )}
         {page === 2 && (
           <div>
-            <h3>Step 2: Creating Walls</h3>
+            <h3>Step 2: Creating Walls and Weights</h3>
             <p>
               Walls are obstacles that cannot be crossed by the pathfinding
               algorithm. To create a wall, simply click and drag over the grid
-              cells. To remove a wall, click and drag over the wall again.
+              cells. To remove a wall, click and drag over the wall again. 
+              </p>
+              <p>
+              Weights are another form of an obstacle that only A* and Dijkstra's
+              algorithms consider in their search for the finish node. They are considered 
+              "weighted algorithms". Weights add a cost to traversing through a node. 
+              Initially, the weight of each node is 1. However, adding a weight 
+              will randomly generate number between 2 and 5, and the algorithms will take into 
+              account the weight of each node when determinging the shotest path. To create a node,
+              you can toggle it by clicking on the "Toggle Weights" button in the navigation bar.
+              
             </p>
             <button className="tutorial-prev-button" onClick={handlePrevPage}>
               Prev
@@ -117,6 +127,23 @@ export default function Tutorial(props) {
         )}
 
         {page === 6 && (
+          <div>
+            <h3>Comparison Mode</h3>
+            <p>
+              Comparison Mode is a tool that allows you to compare the performance
+              two different pathfinding algorithms. You will be able to see how they explore
+              the grid in different ways to find the finish node. 
+            </p>
+            <button className="tutorial-prev-button" onClick={handlePrevPage}>
+              Prev
+            </button>
+            <button className="tutorial-next-button" onClick={handleNextPage}>
+              Next
+            </button>
+          </div>
+          )}
+
+        {page === 7 && (
           <div>
             <h3>About the Algorithms</h3>
             <p>

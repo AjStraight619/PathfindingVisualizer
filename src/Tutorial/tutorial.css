@@ -11,6 +11,7 @@
     border: 2px solid #ccc;
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    z-index: 2;
   }
   .tutorial-content {
     overflow: auto;
