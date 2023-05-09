@@ -320,25 +320,27 @@ export default class PathFinding extends Component {
 
   enableOrDisableWeights() {
     const { grid, isWeightDisabled } = this.state;
-  
-  for (let i = 0; i < grid.length; i++) {
-    for (let j = 0; j < grid[i].length; j++) {
-      const node = grid[i][j];
-      if (node.isWeight) {
-        const element = document.getElementById(`node-${node.row}-${node.col}`);
-        if (isWeightDisabled) {
-          element.classList.add("weight-fade");
-          node.isWeight = false;
-          node.weight = 1;
-        } else {
-          element.classList.remove("weight-fade");
-          node.isWeight = true;
-          node.weight = this.state.weight;
+
+    for (let i = 0; i < grid.length; i++) {
+      for (let j = 0; j < grid[i].length; j++) {
+        const node = grid[i][j];
+        if (node.isWeight) {
+          const element = document.getElementById(
+            `node-${node.row}-${node.col}`
+          );
+          if (isWeightDisabled) {
+            element.classList.add("weight-fade");
+            node.isWeight = false;
+            node.weight = 1;
+          } else {
+            element.classList.remove("weight-fade");
+            node.isWeight = true;
+            node.weight = this.state.weight;
+          }
         }
       }
     }
   }
-}
 
   // algoSelection = (currentAlgoSelected) => {
   //   const { comparisonMode, selectedAlgorithms } = this.state;
@@ -382,20 +384,20 @@ export default class PathFinding extends Component {
   algoSelection = (currentAlgoSelected) => {
     const { comparisonMode, selectedAlgorithms } = this.state;
     let newSelectedAlgorithms = [...selectedAlgorithms];
-  
+
     const algoObj = this.algoMapping[currentAlgoSelected];
     // if (algoObj && algoObj.weighted) {
     //   // Algorithm is weighted, disable weights on the grid
     //   this.setState({ isWeightDisabled: true });
     //   this.enableOrDisableWeights();
-      
+
     // } else {
     //   // Algorithm is not weighted, enable weights on the grid
     //   this.setState({ isWeightDisabled: false });
     //   this.enableOrDisableWeights();
-      
+
     // }
-  
+
     // If comparisonMode is on, handle the selection accordingly
     if (comparisonMode) {
       if (newSelectedAlgorithms.includes(currentAlgoSelected)) {
@@ -409,7 +411,7 @@ export default class PathFinding extends Component {
       // In non-comparison mode, replace the selected algorithm
       newSelectedAlgorithms = [currentAlgoSelected];
     }
-  
+
     this.setState({
       selectedAlgorithms: newSelectedAlgorithms,
       algorithm: currentAlgoSelected,
@@ -618,7 +620,7 @@ export default class PathFinding extends Component {
   }
 
   animateMaze = (walls) => {
-    for (let i = 0; i <= walls.length; i++) {
+    for (let i = 0; i < walls.length; i++) {
       if (i === walls.length) {
         setTimeout(() => {
           let newGrid = getNewGridWithMaze(this.state.grid, walls);
@@ -628,6 +630,9 @@ export default class PathFinding extends Component {
       }
       let wall = walls[i];
       let node = this.state.grid[wall[0]][wall[1]];
+      if (node.isWall || node.isWeight) {
+        continue;
+      }
       setTimeout(() => {
         //Walls
         document.getElementById(`node-${node.row}-${node.col}`).className =
@@ -711,7 +716,16 @@ export default class PathFinding extends Component {
           <Router>
             <Navbar bg="dark" variant="dark" expand="lg" color="">
               <Container fluid>
-                <Navbar.Brand href="#">Pathfinding Algorithms</Navbar.Brand>
+                <Navbar.Brand href="#">
+                  <img
+                    src={process.env.PUBLIC_URL + "/path.png"}
+                    width="30"
+                    height="30"
+                    className="d-inline-block align-top"
+                    alt=""
+                  />
+                  {" Pathfinding Algorithms"}
+                </Navbar.Brand>
                 <Navbar.Toggle aria-controls="navbarScroll" />
                 <Navbar.Collapse id="navbarScroll">
                   <Nav
@@ -1081,6 +1095,9 @@ const createNode = (col, row) => {
 const getNewGridWithWallToggled = (grid, row, col) => {
   const newGrid = grid.slice();
   const node = newGrid[row][col];
+  if (node.isWeight) {
+    return newGrid;
+  }
   const newNode = {
     ...node,
     isWall: !node.isWall,
@@ -1092,10 +1109,14 @@ const getNewGridWithWallToggled = (grid, row, col) => {
 const getNewGridWithMaze = (grid, walls) => {
   let newGrid = grid.slice();
   for (let wall of walls) {
+    if (grid[wall[0]][wall[1]].isWeight || grid[wall[0]][wall[1]].isWall) {
+      continue;
+    }
     let node = grid[wall[0]][wall[1]];
+
     let newNode = {
       ...node,
-      isWall: true,
+      isWall: !node.isWall,
     };
     newGrid[wall[0]][wall[1]] = newNode;
   }
@@ -1105,6 +1126,9 @@ const getNewGridWithMaze = (grid, walls) => {
 const getNewGridWithWeightToggled = (grid, row, col) => {
   const newGrid = grid.slice();
   const node = newGrid[row][col];
+  if (node.isWall) {
+    return newGrid;
+  }
   const newNode = {
     ...node,
     isWeight: !node.isWeight,
