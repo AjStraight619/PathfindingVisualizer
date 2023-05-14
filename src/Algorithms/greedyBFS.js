@@ -13,7 +13,7 @@ export function greedyBFS(grid, startNode, finishNode) {
     }
 
     if (currentNode.isWall) continue;
-    if (currentNode.distance === Infinity) return closedSet;
+    // if (currentNode.distance === Infinity) return closedSet;
     closedSet.push(currentNode); // pushing node to closed set [visited nodes]
     removeFromArray(openSet, currentNode); // removing current node from the open set.
 
