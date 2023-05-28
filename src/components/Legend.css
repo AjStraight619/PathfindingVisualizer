@@ -1,0 +1,36 @@
+.legend-container {
+    position: fixed;
+    top: 20%;
+    right: 8%;
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+  }
+  .legend-list,
+  .comparison-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .legend-icon {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+  }
+  .legend-list li,
+  .comparison-list li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .legend-color {
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+    position: relative;
+    top: 0.35em;
+    margin-right: 8px;
+  }

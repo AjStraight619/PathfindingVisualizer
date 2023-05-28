@@ -1,4 +1,4 @@
-import { GridProps, Node } from "./types/types";
+import { GridProps, NodeType } from "./types/types";
 
 export const START_NODE_ROW = 19;
 export const START_NODE_COL = 8;
@@ -6,38 +6,21 @@ export const FINISH_NODE_ROW = 19;
 export const FINISH_NODE_COL = 57;
 export const weghtedAlgorithms = "Dijkstra" && "A*";
 
-// row: number;
-// col: number;
-// isStart: boolean;
-// isFinish: boolean;
-// isWall: boolean;
-// isWeight: boolean;
-// isVisited: boolean;
-// hScore: number;
-// gScore: number;
-// fScore: number;
-// parent: Node | null;
-// weight: number;
-// draggable: boolean;
-// closest: number;
-// distance: number;
-
-
-export const getInitialGrid = (): Node[][] => {
-    const grid = [];
-    for (let row = 0; row < 40; row++) {
-      const currentRow = [];
-      for (let col = 0; col < 69; col++) {
-        currentRow.push(createNode(col, row));
-      }
-      grid.push(currentRow);
+export const getInitialGrid = (): NodeType[][] => {
+  const grid = [];
+  for (let row = 0; row < 40; row++) {
+    const currentRow = [];
+    for (let col = 0; col < 68; col++) {
+      currentRow.push(createNode(row, col));
     }
-  
-    return grid;
-  };
+    grid.push(currentRow);
+  }
 
-const createNode = (row: number, col: number): Node => {
-    const isStart = row === START_NODE_ROW && col === START_NODE_COL;
+  return grid;
+};
+
+const createNode = (row: number, col: number): NodeType => {
+  const isStart = row === START_NODE_ROW && col === START_NODE_COL;
   return {
     row,
     col,
@@ -50,18 +33,20 @@ const createNode = (row: number, col: number): Node => {
     gScore: 0,
     fScore: 0,
     closest: 0,
+    totalDistance: 0,
     distance: 0,
     parent: null,
     weight: 1,
-    draggable: isStart,
-     };
+    isDraggable: isStart,
+    className: "",
+  };
 };
 
 export const getNewGridWithWallToggled = (
-  grid: Node[][],
+  grid: NodeType[][],
   row: number,
   col: number
-): Node[][] => {
+): NodeType[][] => {
   const newGrid = grid.slice();
   const node = newGrid[row][col];
   if (node.isWeight) {
@@ -76,9 +61,9 @@ export const getNewGridWithWallToggled = (
 };
 
 export const getNewGridWithMaze = (
-  grid: Node[][],
+  grid: NodeType[][],
   walls: [number, number][]
-): Node[][] => {
+): NodeType[][] => {
   let newGrid = grid.slice();
   for (let wall of walls) {
     let node = grid[wall[0]][wall[1]];
@@ -93,10 +78,10 @@ export const getNewGridWithMaze = (
 };
 
 export const getNewGridWithWeightToggled = (
-  grid: Node[][],
+  grid: NodeType[][],
   row: number,
   col: number
-): Node[][] => {
+): NodeType[][] => {
   const newGrid = grid.slice();
   const node = newGrid[row][col];
   if (node.isWall) {
@@ -112,9 +97,9 @@ export const getNewGridWithWeightToggled = (
   return newGrid;
 };
 
-export function getNodesInShortestPathOrder(finishNode: Node): Node[] {
-  const nodesInShortestPathOrder: Node[] = [];
-  let currentNode: Node | null = finishNode;
+export function getNodesInShortestPathOrder(finishNode: NodeType): NodeType[] {
+  const nodesInShortestPathOrder: NodeType[] = [];
+  let currentNode: NodeType | null = finishNode;
   while (currentNode !== null) {
     nodesInShortestPathOrder.unshift(currentNode);
     currentNode = currentNode.parent ? currentNode.parent : null;

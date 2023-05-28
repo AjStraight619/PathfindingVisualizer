@@ -1,7 +1,7 @@
-import { Node } from "../types/types";
-const aStar = (grid: Node[][], startNode: Node, finishNode: Node) => {
-  const openSet: Node[] = [];
-  const closedSet: Node[] = [];
+import { NodeType } from "../types/types";
+const aStar = (grid: NodeType[][], startNode: NodeType, finishNode: NodeType) => {
+  const openSet: NodeType[] = [];
+  const closedSet: NodeType[] = [];
   openSet.push(startNode);
   startNode.fScore = heuristic(startNode, finishNode);
 
@@ -52,8 +52,8 @@ const aStar = (grid: Node[][], startNode: Node, finishNode: Node) => {
   }
 };
 
-// after exploring this node we remove it from the open set so we do not visit it again
-const removeFromArray = (openSet: Node[], currentNode: Node) => {
+// after exploring this node we remove it from the openSet so we do not visit it again
+const removeFromArray = (openSet: NodeType[], currentNode: NodeType) => {
   for (let i = openSet.length - 1; i >= 0; i--) {
     if (openSet[i] === currentNode) {
       openSet.splice(i, 1);
@@ -61,16 +61,16 @@ const removeFromArray = (openSet: Node[], currentNode: Node) => {
   }
 };
 
-const heuristic = (currentNode: Node, finishNode: Node) => {
+const heuristic = (currentNode: NodeType, finishNode: NodeType) => {
   const dx = Math.abs(currentNode.row - finishNode.row);
   const dy = Math.abs(currentNode.col - finishNode.col);
   return dx + dy;
 };
 
 // get the adjacent neighbors of the current node
-const getNeighbors = (currentNode: Node, grid: Node[][]) => {
+const getNeighbors = (currentNode: NodeType, grid: NodeType[][]) => {
   const { row, col } = currentNode;
-  const neighbors: Node[] = [];
+  const neighbors: NodeType[] = [];
 
   if (row > 0) neighbors.push(grid[row - 1][col]);
   if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
