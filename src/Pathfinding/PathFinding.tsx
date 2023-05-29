@@ -11,6 +11,7 @@ import Node from "./Node/Node";
 import MyNavbar from "../components/MyNavbar";
 import Legend from "../components/Legend";
 import "./Pathfinding.css";
+import "./Node/Node.css";
 
 import {
   START_NODE_COL,
@@ -25,14 +26,15 @@ import BFS from "../Algorithms/bfs";
 import beamSearch from "../Algorithms/beamSearch";
 import bestFirstSearch from "../Algorithms/bestFirstSearch";
 import greedyBFS from "../Algorithms/greedyBFS";
-
-const WEIGHTED_ALGOS = "A*" && "dijkstra";
+import { Tutorial } from "../components/Tutorial";
 
 const PathFinding = () => {
   const algoMapping: { [key: string]: Algorithm } = {
     "A*": {
       name: "A*",
       id: "A*",
+      isShortestPathAlgo: true,
+      isWeighted: true,
       func: (grid, startNode, finishNode) =>
         aStar(grid, startNode, finishNode) || [],
     },
@@ -40,6 +42,8 @@ const PathFinding = () => {
     "Beam Search": {
       name: "Beam Search",
       id: "beamSearch",
+      isShortestPathAlgo: false,
+      isWeighted: false,
       func: (grid, startNode, finishNode) =>
         beamSearch(grid, startNode, finishNode) || [],
     },
@@ -47,6 +51,8 @@ const PathFinding = () => {
     "Best First Search": {
       name: "Best First Search",
       id: "bestFirstSearch",
+      isShortestPathAlgo: false,
+      isWeighted: false,
       func: (grid, startNode, finishNode) =>
         bestFirstSearch(grid, startNode, finishNode) || [],
     },
@@ -54,6 +60,8 @@ const PathFinding = () => {
     "Breadth-first Search": {
       name: "Breadth-first Search",
       id: "bfs",
+      isShortestPathAlgo: true,
+      isWeighted: false,
       func: (grid, startNode, finishNode) =>
         BFS(grid, startNode, finishNode) || [],
     },
@@ -61,6 +69,8 @@ const PathFinding = () => {
     "Depth First Search": {
       name: "depthFirstSearch",
       id: "depthFirstSearch",
+      isShortestPathAlgo: false,
+      isWeighted: false,
       func: (grid, startNode, finishNode) =>
         depthFirstSearch(grid, startNode, finishNode) || [],
     },
@@ -68,6 +78,8 @@ const PathFinding = () => {
     Dijkstra: {
       name: "Dijkstra",
       id: "Dijkstra",
+      isShortestPathAlgo: true,
+      isWeighted: true,
       func: (grid, startNode, finishNode) =>
         dijkstra(grid, startNode, finishNode) || [],
     },
@@ -75,6 +87,8 @@ const PathFinding = () => {
     "Greedy Best-First Search": {
       name: "Greedy Best-First Search",
       id: "greedyBFS",
+      isShortestPathAlgo: false,
+      isWeighted: true,
       func: (grid, startNode, finishNode) =>
         greedyBFS(grid, startNode, finishNode) || [],
     },
@@ -88,9 +102,9 @@ const PathFinding = () => {
   };
 
   const speedMapping: { [key: string]: number } = {
-    Fast: 10,
-    Medium: 20,
-    Slow: 30,
+    Fast: 1,
+    Medium: 5,
+    Slow: 8,
   };
 
   const defaultNode: NodeType = {
@@ -118,12 +132,8 @@ const PathFinding = () => {
     row: START_NODE_ROW,
     col: START_NODE_COL,
   });
-  const [finishNode, setFinishNode] = useState<NodeType>({
-    ...defaultNode,
-    row: FINISH_NODE_ROW,
-    col: FINISH_NODE_COL,
-  });
-  const [grid, setGrid] = useState<NodeType[][]>([[]]);
+
+  const [grid, setGrid] = useState<NodeType[][]>(getInitialGrid());
   const [animationStopped, setAnimationStopped] = useState(false);
   const [visualizingAlgorithm, setVisualizingAlgorithm] = useState(false);
   const [generatingMaze, setGeneratingMaze] = useState(false);
@@ -134,7 +144,6 @@ const PathFinding = () => {
   const [isAlgoSelected, setIsAlgoSelected] = useState(false);
   const [selectedMaze, setSelectedMaze] = useState<Maze[]>([]);
   const [selectedSpeed, setSelectedSpeed] = useState("Fast");
-  const [isShortestPathAlgo, setIsShortestPathAlgo] = useState(false);
   const [tutorial, setTutorial] = useState(true);
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [draggedNode, setDraggedNode] = useState<{
@@ -142,6 +151,7 @@ const PathFinding = () => {
     col: number;
   } | null>(null);
   const [dragType, setDragType] = useState("");
+  const [tutorialOpen, setTutorialOpen] = useState(true);
 
   useEffect(() => {
     const initialGrid = getInitialGrid();
@@ -294,72 +304,88 @@ const PathFinding = () => {
     }
   };
 
-  const visualizeAlgorithm = (
-    algorithm: Algorithm,
-    visitedClass: string,
-    shortestPathClass: string
-  ) => {
-    console.log(
-      "In visualize Algorithm",
-      algorithm,
-      visualizingAlgorithm,
-      generatingMaze
-    );
-    if (!algorithm || visualizingAlgorithm || generatingMaze) {
-      return;
+  const visualizeAlgorithm = (algorithm: Algorithm): void => {
+    if (!algorithm.func) {
+      throw new Error(
+        `Function not implemented for algorithm ${algorithm.name}`
+      );
     }
 
     setVisualizingAlgorithm(true);
 
-    const visitedNodesInOrder = algorithm.func!(grid, startNode, finishNode);
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+    const startNode = grid[START_NODE_ROW][START_NODE_COL];
+    const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
 
-    animate(
-      visitedNodesInOrder,
-      nodesInShortestPathOrder,
-      visitedClass,
-      shortestPathClass
-    );
-    console.log("animate called");
+    const visitedNodesInOrder = algorithm.func(grid, startNode, finishNode);
+    console.log("visitedNodesInOrder", visitedNodesInOrder);
+
+    if (visitedNodesInOrder.length === 0) {
+      setVisualizingAlgorithm(false);
+      return;
+    }
+
+    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+    console.log("nodesInShortestPathOrder", nodesInShortestPathOrder);
+
+    animate(visitedNodesInOrder, nodesInShortestPathOrder);
   };
 
   const animate = (
     visitedNodesInOrder: NodeType[],
-    nodesInShortestPathOrder: NodeType[],
-    visitedClass: string,
-    shortestPathClass: string
-  ) => {};
+    nodesInShortestPathOrder: NodeType[]
+  ): void => {
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      setTimeout(() => {
+        if (i === visitedNodesInOrder.length) {
+          animateShortestPath(nodesInShortestPathOrder);
+        } else {
+          const node = visitedNodesInOrder[i];
+          const element = document.getElementById(
+            `node-${node.row}-${node.col}`
+          );
+          if (element) {
+            if (element.classList.contains("node-weight")) {
+              element.className = "node node-weight node-visited";
+            } else {
+              element.className = "node node-visited";
+            }
+          }
+        }
+      }, speed * i);
+    }
+  };
 
+  const animateShortestPath = (nodesInShortestPathOrder: NodeType[]): void => {
+    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      setTimeout(() => {
+        const node = nodesInShortestPathOrder[i];
+        const element = document.getElementById(`node-${node.row}-${node.col}`);
+        if (element) {
+          element.className = "node node-shortest-path";
+        }
+      }, speed * i);
+    }
+  };
   const runAlgorithm = (selectedAlgorithms: Algorithm[]): void => {
-    if (comparisonMode && selectedAlgorithms.length !== 2) return;
+    if (comparisonMode && selectedAlgorithms.length !== 2) {
+      return;
+    }
 
     if (comparisonMode) {
-      // Run both algorithms
-      visualizeAlgorithm(
-        selectedAlgorithms[0],
-        "node-visited",
-        "node-shortest-path"
-      );
-
-      visualizeAlgorithm(
-        selectedAlgorithms[1],
-        "node-visited-second",
-        "node-shortest-path-second"
-      );
+      visualizeAlgorithm(selectedAlgorithms[0]);
+      visualizeAlgorithm(selectedAlgorithms[1]);
     } else {
-      // Run the single selected algorithm
-      visualizeAlgorithm(
-        selectedAlgorithms[0],
-        "node-visited",
-        "node-shortest-path"
-      );
+      visualizeAlgorithm(selectedAlgorithms[0]);
     }
   };
 
   const algoSelection = (currentAlgoSelected: string): void => {
     let newSelectedAlgorithms = [...selectedAlgorithms];
+
     const selectedAlgorithm: Algorithm = {
       id: currentAlgoSelected,
+      isShortestPathAlgo: algoMapping[currentAlgoSelected].isShortestPathAlgo,
+      isWeighted: algoMapping[currentAlgoSelected].isWeighted,
       name: algoMapping[currentAlgoSelected].name,
       func: algoMapping[currentAlgoSelected].func,
     };
@@ -505,21 +531,22 @@ const PathFinding = () => {
           {comparisonMode
             ? selectedAlgorithms.length === 1
               ? "You are in comparison mode, choose one more algorithm to compare " +
-                selectedAlgorithms[0] +
+                selectedAlgorithms[0].name +
                 " with."
               : selectedAlgorithms.length === 2
               ? "Comparing " +
-                selectedAlgorithms[0] +
+                selectedAlgorithms[0].name +
                 " with " +
-                selectedAlgorithms[1]
+                selectedAlgorithms[1].name
               : ""
             : isAlgoSelected
-            ? isShortestPathAlgo && WEIGHTED_ALGOS
+            ? selectedAlgorithms[0].isShortestPathAlgo &&
+              selectedAlgorithms[0].isWeighted
               ? "You chose " +
-                selectedAlgorithms[0] +
+                selectedAlgorithms[0].name +
                 ". This algorithm is weighted, and guarantees the shortest path."
               : "You chose " +
-                selectedAlgorithms[0] +
+                selectedAlgorithms[0].name +
                 ", this algorithm is not weighted, and does not guarantee the shortest path."
             : ""}
         </p>
@@ -564,6 +591,7 @@ const PathFinding = () => {
           );
         })}
       </div>
+      {tutorialOpen && <Tutorial onClose={() => setTutorialOpen(false)} />}
     </React.Fragment>
   );
 };

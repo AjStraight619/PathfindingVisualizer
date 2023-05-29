@@ -20,6 +20,7 @@ const bestFirstSearch = (
     closedSet.push(currentNode);
 
     if (currentNode === finishNode) {
+      console.log("closedSet: ", closedSet);
       return closedSet;
     }
 

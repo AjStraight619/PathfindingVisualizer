@@ -1,5 +1,9 @@
 import { NodeType } from "../types/types";
-const aStar = (grid: NodeType[][], startNode: NodeType, finishNode: NodeType) => {
+const aStar = (
+  grid: NodeType[][],
+  startNode: NodeType,
+  finishNode: NodeType
+) => {
   const openSet: NodeType[] = [];
   const closedSet: NodeType[] = [];
   openSet.push(startNode);
@@ -24,6 +28,7 @@ const aStar = (grid: NodeType[][], startNode: NodeType, finishNode: NodeType) =>
     currentNode.isVisited = true;
 
     if (currentNode === finishNode) {
+      console.log("closedSet", closedSet);
       return closedSet;
     }
 
@@ -40,9 +45,8 @@ const aStar = (grid: NodeType[][], startNode: NodeType, finishNode: NodeType) =>
             neighbor.gScore = tempGScore;
           }
         } else {
-            neighbor.gScore = tempGScore;
-            openSet.push(neighbor);
-              
+          neighbor.gScore = tempGScore;
+          openSet.push(neighbor);
         }
         neighbor.hScore = heuristic(neighbor, finishNode);
         neighbor.fScore = neighbor.gScore + neighbor.hScore;

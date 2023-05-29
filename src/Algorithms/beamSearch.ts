@@ -4,7 +4,7 @@ const beamSearch = (
   grid: NodeType[][],
   startNode: NodeType,
   finishNode: NodeType,
-  beamWidth = 5
+  beamWidth = 4
 ): NodeType[] | null => {
   let openSet: NodeType[] = [startNode];
   let closedSet: NodeType[] = [];
@@ -18,19 +18,19 @@ const beamSearch = (
       }
 
       if (currentNode.isWall) continue;
-      currentNode.isVisited = true;
 
+      currentNode.isVisited = true;
       closedSet.push(currentNode);
+
       const neighbors = getUnvisitedNeighbors(currentNode, grid);
 
       for (const neighbor of neighbors) {
         if (!closedSet.includes(neighbor) && !neighbor.isWall) {
           neighbor.parent = currentNode;
           neighbor.weight = currentNode.weight + neighbor.weight;
+          nextSet.push(neighbor);
         }
       }
-
-      nextSet.push(...neighbors);
     }
 
     openSet = nextSet
@@ -58,7 +58,9 @@ function getUnvisitedNeighbors(node: NodeType, grid: NodeType[][]): NodeType[] {
   if (col < grid[0].length - 1) {
     neighbors.push(grid[row][col + 1]);
   }
-  return neighbors.filter((neighbor) => !neighbor.isVisited);
+  return neighbors.filter(
+    (neighbor) => !neighbor.isVisited && !neighbor.isWall
+  );
 }
 
 function heuristic(node: NodeType, finishNode: NodeType): number {

@@ -61,6 +61,8 @@ export type GridProps = {
 export interface Algorithm {
   id: string;
   name: string;
+  isShortestPathAlgo: boolean;
+  isWeighted: boolean;
   func?: (
     grid: NodeType[][],
     startNode: NodeType,
