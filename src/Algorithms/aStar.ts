@@ -1,4 +1,6 @@
 import { NodeType } from "../types/types";
+import { getNeighbors } from "../PathFindingUtils";
+
 const aStar = (
   grid: NodeType[][],
   startNode: NodeType,
@@ -69,19 +71,6 @@ const heuristic = (currentNode: NodeType, finishNode: NodeType) => {
   const dx = Math.abs(currentNode.row - finishNode.row);
   const dy = Math.abs(currentNode.col - finishNode.col);
   return dx + dy;
-};
-
-// get the adjacent neighbors of the current node
-const getNeighbors = (currentNode: NodeType, grid: NodeType[][]) => {
-  const { row, col } = currentNode;
-  const neighbors: NodeType[] = [];
-
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col > 0) neighbors.push(grid[row][col - 1]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-
-  return neighbors.filter((neighbor) => !neighbor.isVisited);
 };
 
 export default aStar;

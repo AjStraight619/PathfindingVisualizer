@@ -4,7 +4,7 @@ const beamSearch = (
   grid: NodeType[][],
   startNode: NodeType,
   finishNode: NodeType,
-  beamWidth = 4
+  beamWidth = 3
 ): NodeType[] | null => {
   let openSet: NodeType[] = [startNode];
   let closedSet: NodeType[] = [];
@@ -22,7 +22,7 @@ const beamSearch = (
       currentNode.isVisited = true;
       closedSet.push(currentNode);
 
-      const neighbors = getUnvisitedNeighbors(currentNode, grid);
+      const neighbors = getNeighbors(currentNode, grid);
 
       for (const neighbor of neighbors) {
         if (!closedSet.includes(neighbor) && !neighbor.isWall) {
@@ -41,7 +41,7 @@ const beamSearch = (
   return null;
 };
 
-function getUnvisitedNeighbors(node: NodeType, grid: NodeType[][]): NodeType[] {
+function getNeighbors(node: NodeType, grid: NodeType[][]): NodeType[] {
   const neighbors: NodeType[] = [];
 
   const { col, row } = node;

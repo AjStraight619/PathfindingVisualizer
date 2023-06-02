@@ -102,9 +102,9 @@ const PathFinding = () => {
   };
 
   const speedMapping: { [key: string]: number } = {
-    Fast: 1,
-    Medium: 5,
-    Slow: 8,
+    Fast: 5,
+    Medium: 15,
+    Slow: 60,
   };
 
   const defaultNode: NodeType = {
@@ -144,7 +144,8 @@ const PathFinding = () => {
   const [isAlgoSelected, setIsAlgoSelected] = useState(false);
   const [selectedMaze, setSelectedMaze] = useState<Maze[]>([]);
   const [selectedSpeed, setSelectedSpeed] = useState("Fast");
-  const [tutorial, setTutorial] = useState(true);
+  const [hasMaze, setHasMaze] = useState(false);
+
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [draggedNode, setDraggedNode] = useState<{
     row: number;
@@ -355,6 +356,40 @@ const PathFinding = () => {
     }
   };
 
+  const generateRecursiveDivisionMaze = () => {
+    if (visualizingAlgorithm || generatingMaze) {
+      return;
+    }
+    setGeneratingMaze(true);
+    setTimeout(() => {
+      const startNode = grid[START_NODE_ROW][START_NODE_COL];
+      const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+      const walls = recursiveDivisionMaze(grid, startNode, finishNode);
+      animateMaze(walls);
+    }, speed);
+  };
+
+  const generateRandomMaze = () => {
+    if (visualizingAlgorithm || generatingMaze || hasMaze) {
+      return;
+    }
+    setGeneratingMaze(true);
+    setTimeout(() => {
+      const startNode = grid[START_NODE_ROW][START_NODE_COL];
+      const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+      const walls = recursiveDivisionMaze(grid, startNode, finishNode);
+      animateMaze(walls);
+    }, speed);
+  };
+
+  const generateCurMaze = () => {
+    if (selectedMaze[0].name === "DFS") {
+      generateRecursiveDivisionMaze();
+    } else if (selectedMaze[0].name === "Random Maze") {
+      generateRandomMaze();
+    }
+  };
+
   const animateShortestPath = (nodesInShortestPathOrder: NodeType[]): void => {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       setTimeout(() => {
@@ -419,7 +454,7 @@ const PathFinding = () => {
     setSelectedMaze(newSelectedMaze);
   };
 
-  const speedSelection = (speedName: string) => {
+  const speedSelection = (speedName: string): void => {
     const newSpeed = speedMapping[speedName];
     setSpeed(newSpeed);
     setSelectedSpeed(speedName);
@@ -434,7 +469,7 @@ const PathFinding = () => {
   };
 
   const toggleTutorial = (): void => {
-    setTutorial(!tutorial);
+    setTutorialOpen((prevState) => !prevState);
   };
 
   const clearVisualization = () => {
@@ -597,3 +632,14 @@ const PathFinding = () => {
 };
 
 export default PathFinding;
+function recursiveDivisionMaze(
+  grid: NodeType[][],
+  startNode: NodeType,
+  finishNode: NodeType
+) {
+  throw new Error("Function not implemented.");
+}
+
+function animateMaze(walls: void) {
+  throw new Error("Function not implemented.");
+}

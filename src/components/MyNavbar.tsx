@@ -93,11 +93,9 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
                     ? selectedAlgorithms[0].name
                     : ""}
                 </Button>
-                <Button
-                  className="ml-2"
-                  variant="secondary"
-                  // onClick={() => generateCurMaze(currentMazeType)}
-                ></Button>
+                <Button className="ml-2" variant="secondary">
+                  Generate {selectedMaze.length > 0 ? selectedMaze[0].name : ""}
+                </Button>
               </ButtonGroup>
 
               <NavDropdown
@@ -158,7 +156,7 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
                 Clear Path
               </Nav.Link>
               <Nav.Link onClick={() => clearBoard()}>Clear Board</Nav.Link>
-              <Nav.Link onClick={toggleTutorial}>Toggle Tutorial</Nav.Link>
+              <Nav.Link onClick={toggleTutorial}>Tutorial</Nav.Link>
             </Nav>
           </Navbar.Collapse>
           <div className="ml-auto">

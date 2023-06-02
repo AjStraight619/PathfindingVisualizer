@@ -1,5 +1,7 @@
 import { NodeType } from "../types/types";
+import { getNeighbors } from "../PathFindingUtils";
 
+// Recursive implementation
 const depthFirstSearch = (
   grid: NodeType[][],
   startNode: NodeType,
@@ -27,7 +29,7 @@ function depthFirstSearchHelper(
     return true;
   }
 
-  const unvisitedNeighbors = getUnvisitedNeighbors(currentNode, grid);
+  const unvisitedNeighbors = getNeighbors(currentNode, grid);
   for (const neighbor of unvisitedNeighbors) {
     if (!neighbor.isVisited && !neighbor.isWall) {
       neighbor.parent = currentNode;
@@ -39,18 +41,6 @@ function depthFirstSearchHelper(
     }
   }
   return false;
-}
-
-function getUnvisitedNeighbors(node: NodeType, grid: NodeType[][]): NodeType[] {
-  const neighbors: NodeType[] = [];
-  const { row, col } = node;
-
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col > 0) neighbors.push(grid[row][col - 1]);
-
-  return neighbors.filter((neighbor) => !neighbor.isVisited);
 }
 
 export default depthFirstSearch;

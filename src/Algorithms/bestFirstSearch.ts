@@ -1,4 +1,5 @@
 import { NodeType } from "../types/types";
+import { getNeighbors } from "../PathFindingUtils";
 
 const bestFirstSearch = (
   grid: NodeType[][],
@@ -24,7 +25,7 @@ const bestFirstSearch = (
       return closedSet;
     }
 
-    const neighbors = getUnvisitedNeighbors(currentNode, grid);
+    const neighbors = getNeighbors(currentNode, grid);
     for (let i = 0; i < neighbors.length; i++) {
       const neighbor = neighbors[i];
       if (!closedSet.includes(neighbor) && !neighbor.isWall) {
@@ -38,21 +39,6 @@ const bestFirstSearch = (
 
   return closedSet;
 };
-
-function getUnvisitedNeighbors(
-  currentNode: NodeType,
-  grid: NodeType[][]
-): NodeType[] {
-  const neighbors: NodeType[] = [];
-  const { col, row } = currentNode;
-
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col > 0) neighbors.push(grid[row][col - 1]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-
-  return neighbors.filter((neighbor) => !neighbor.isVisited);
-}
 
 function manhattanDistance(node: NodeType, finishNode: NodeType): number {
   return (
