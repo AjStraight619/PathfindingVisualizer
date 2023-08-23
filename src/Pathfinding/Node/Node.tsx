@@ -12,6 +12,7 @@ const Node: React.FC<NodeProps> = ({
   handleDragStart,
   handleDrop,
   handleDragEnd,
+  shouldFadeWeight,
 }) => {
   const { row, col, isStart, isFinish, isWall, isWeight, isDraggable } = node;
 
@@ -51,7 +52,13 @@ const Node: React.FC<NodeProps> = ({
       onDrag={(e) => e.preventDefault()}
       onDragEnd={onDragEnd}
     >
-      {isWeight ? <FiAnchor className="weight-icon" /> : null}
+      {isWeight ? (
+        <span
+          className={`weight-icon ${shouldFadeWeight ? "weight-fade" : ""}`} // <-- Use the new prop here
+        >
+          <FiAnchor />
+        </span>
+      ) : null}
       {isStart ? <FiChevronRight className="start-icon" /> : null}
       {isFinish ? <FiCrosshair className="finish-icon" /> : null}
     </div>

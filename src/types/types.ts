@@ -39,6 +39,7 @@ export type NodeProps = {
   handleDrop: (e: React.DragEvent, row: number, col: number) => void;
   handleDragEnd: (row: number, col: number) => void;
   className: string;
+  shouldFadeWeight: boolean;
 };
 
 export type GridProps = {

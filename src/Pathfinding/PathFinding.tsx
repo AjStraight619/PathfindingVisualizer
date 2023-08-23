@@ -95,9 +95,19 @@ const PathFinding = () => {
   };
 
   const mazeMapping: { [key: string]: Maze } = {
-    DFSMaze: {
+    "Depth-First Search": {
       name: "DFS Maze",
       id: "DFSMaze",
+    },
+
+    "Recursive Division": {
+      name: "Recursive Division",
+      id: "Recursive Division",
+    },
+
+    "Random Maze": {
+      name: "Random Maze",
+      id: "Random Maze",
     },
   };
 
@@ -133,6 +143,12 @@ const PathFinding = () => {
     col: START_NODE_COL,
   });
 
+  const [finishNode, setFinishNode] = useState<NodeType>({
+    ...defaultNode,
+    row: FINISH_NODE_ROW,
+    col: FINISH_NODE_COL,
+  });
+
   const [grid, setGrid] = useState<NodeType[][]>(getInitialGrid());
   const [animationStopped, setAnimationStopped] = useState(false);
   const [visualizingAlgorithm, setVisualizingAlgorithm] = useState(false);
@@ -153,6 +169,7 @@ const PathFinding = () => {
   } | null>(null);
   const [dragType, setDragType] = useState("");
   const [tutorialOpen, setTutorialOpen] = useState(true);
+  const [algorithmVisualized, setAlgorithmVisualized] = useState(false);
 
   useEffect(() => {
     const initialGrid = getInitialGrid();
@@ -267,11 +284,13 @@ const PathFinding = () => {
     if (dragType === "start") {
       newGrid[newRow][newCol].isStart = true;
       newGrid[newRow][newCol].isDraggable = true; // Set isDraggable to true for the new node
-      setStartNode((prevStartNode) => ({
-        ...prevStartNode,
+      const newStartNode = {
+        ...newGrid[newRow][newCol],
         row: newRow,
         col: newCol,
-      }));
+        isStart: true,
+      };
+      setStartNode(newStartNode);
     }
 
     setGrid(newGrid);
@@ -297,40 +316,72 @@ const PathFinding = () => {
     }
 
     if (dragType === "start") {
+      console.log(
+        "Start Node Row: ",
+        startNode.row,
+        "Start Node Col: ",
+        startNode.col
+      );
       setStartNode((prevStartNode) => ({
         ...prevStartNode,
         row: row,
         col: col,
+        isStart: true,
       }));
     }
   };
 
-  const visualizeAlgorithm = (algorithm: Algorithm): void => {
-    if (!algorithm.func) {
-      throw new Error(
-        `Function not implemented for algorithm ${algorithm.name}`
-      );
+  const visualizeAlgorithm = (algorithms: Algorithm[]): void => {
+    if (comparisonMode && algorithms.length !== 2) {
+      throw new Error(`Comparison mode requires exactly 2 algorithms`);
     }
-
+    setAlgorithmVisualized(false);
     setVisualizingAlgorithm(true);
 
-    const startNode = grid[START_NODE_ROW][START_NODE_COL];
-    const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+    const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
+    const finish = grid.flatMap((row) =>
+      row.filter((node) => node.isFinish)
+    )[0];
 
-    const visitedNodesInOrder = algorithm.func(grid, startNode, finishNode);
-    console.log("visitedNodesInOrder", visitedNodesInOrder);
+    console.log("startNode: ", start, "finishNode: ", finish);
 
-    if (visitedNodesInOrder.length === 0) {
-      setVisualizingAlgorithm(false);
-      return;
-    }
+    algorithms.forEach((algorithm) => {
+      if (!algorithm.func) {
+        throw new Error(
+          `Function not implemented for algorithm ${algorithm.name}`
+        );
+      }
 
-    const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
-    console.log("nodesInShortestPathOrder", nodesInShortestPathOrder);
+      const visitedNodesInOrder = algorithm.func(grid, start, finish);
+      console.log(
+        `visitedNodesInOrder for ${algorithm.name}`,
+        visitedNodesInOrder
+      );
 
-    animate(visitedNodesInOrder, nodesInShortestPathOrder);
+      if (visitedNodesInOrder.length === 0) {
+        setVisualizingAlgorithm(false);
+        return;
+      }
+
+      const nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
+      console.log(
+        `nodesInShortestPathOrder for ${algorithm.name}`,
+        nodesInShortestPathOrder
+      );
+      setAlgorithmVisualized(true);
+
+      animate(visitedNodesInOrder, nodesInShortestPathOrder);
+    });
   };
 
+  const visualizeAlgorithmWhenDragged = (algorithm: Algorithm[]) => {
+    if (visualizingAlgorithm || comparisonMode) return;
+
+    const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
+    const finish = grid.flatMap((row) =>
+      row.filter((node) => node.isFinish)
+    )[0];
+  };
   const animate = (
     visitedNodesInOrder: NodeType[],
     nodesInShortestPathOrder: NodeType[]
@@ -354,6 +405,123 @@ const PathFinding = () => {
         }
       }, speed * i);
     }
+  };
+
+  const animateComparisonMode = (
+    visitedNodesInOrder1: NodeType[],
+    visitedNodesInOrder2: NodeType[],
+    nodesInShortestPathOrder1: NodeType[],
+    nodesInShortestPathOrder2: NodeType[]
+  ): void => {
+    const longerLength = Math.max(
+      visitedNodesInOrder1.length,
+      visitedNodesInOrder2.length
+    );
+    for (let i = 0; i <= longerLength; i++) {
+      setTimeout(() => {
+        if (i < visitedNodesInOrder1.length) {
+          const node1 = visitedNodesInOrder1[i];
+          const element1 = document.getElementById(
+            `node-${node1.row}-${node1.col}`
+          );
+          if (element1) {
+            element1.className = "node node-visited";
+          }
+        }
+        if (i < visitedNodesInOrder2.length) {
+          const node2 = visitedNodesInOrder2[i];
+          const element2 = document.getElementById(
+            `node-${node2.row}-${node2.col}`
+          );
+          if (element2) {
+            element2.className = element2.classList.contains("node-visited")
+              ? "node node-visited-both"
+              : "node node-visited-second";
+          }
+        }
+
+        if (i === visitedNodesInOrder1.length) {
+          animateShortestPathComparisonMode(
+            nodesInShortestPathOrder1,
+            "node node-shortest-path"
+          );
+        }
+        if (i === visitedNodesInOrder2.length) {
+          animateShortestPathComparisonMode(
+            nodesInShortestPathOrder2,
+            "node node-shortest-path-second"
+          );
+        }
+      }, speed * i);
+    }
+  };
+
+  const animateShortestPathComparisonMode = (
+    nodesInShortestPathOrder: NodeType[],
+    className: string
+  ): void => {
+    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      setTimeout(() => {
+        const node = nodesInShortestPathOrder[i];
+        const element = document.getElementById(`node-${node.row}-${node.col}`);
+        if (element) {
+          element.className = className;
+        }
+      }, speed * i);
+    }
+  };
+
+  const visualizeAlgorithmForComparisonMode = (
+    algorithms: Algorithm[]
+  ): void => {
+    if (algorithms.length !== 2) {
+      throw new Error(`Comparison mode requires exactly 2 algorithms`);
+    }
+
+    setVisualizingAlgorithm(true);
+
+    const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
+    const finish = grid.flatMap((row) =>
+      row.filter((node) => node.isFinish)
+    )[0];
+
+    console.log("startNode: ", start, "finishNode: ", finish);
+
+    const paths = algorithms.map((algorithm) => {
+      if (!algorithm.func) {
+        throw new Error(
+          `Function not implemented for algorithm ${algorithm.name}`
+        );
+      }
+
+      // Clone the grid before passing it to the algorithm
+      const gridCopy = grid.map((row) => [...row]);
+
+      const visitedNodesInOrder = algorithm.func(gridCopy, start, finish);
+      console.log(
+        `visitedNodesInOrder for ${algorithm.name}`,
+        visitedNodesInOrder
+      );
+
+      const nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
+      console.log(
+        `nodesInShortestPathOrder for ${algorithm.name}`,
+        nodesInShortestPathOrder
+      );
+
+      return { visitedNodesInOrder, nodesInShortestPathOrder };
+    });
+
+    animateComparisonMode(
+      paths[0].visitedNodesInOrder,
+      paths[1].visitedNodesInOrder,
+      paths[0].nodesInShortestPathOrder,
+      paths[1].nodesInShortestPathOrder
+    );
+
+    setTimeout(() => {
+      setVisualizingAlgorithm(false);
+    }, speed * Math.max(paths[0].visitedNodesInOrder.length, paths[1].visitedNodesInOrder.length) + speed * Math.max(paths[0].nodesInShortestPathOrder.length, paths[1].nodesInShortestPathOrder.length));
   };
 
   const generateRecursiveDivisionMaze = () => {
@@ -406,11 +574,12 @@ const PathFinding = () => {
       return;
     }
 
+    console.log(selectedAlgorithms.length);
+
     if (comparisonMode) {
-      visualizeAlgorithm(selectedAlgorithms[0]);
-      visualizeAlgorithm(selectedAlgorithms[1]);
+      visualizeAlgorithmForComparisonMode(selectedAlgorithms);
     } else {
-      visualizeAlgorithm(selectedAlgorithms[0]);
+      visualizeAlgorithm([selectedAlgorithms[0]]);
     }
   };
 
@@ -596,17 +765,25 @@ const PathFinding = () => {
             <div key={rowIndex} className="row">
               {row.map((node, nodeIndex) => {
                 const { row, col, isStart, isFinish, isWall, isWeight } = node;
+                let cellClassName = "node";
+                let shouldFadeWeight = false;
+                if (selectedAlgorithms.length > 0) {
+                  if (!selectedAlgorithms[0].isWeighted && node.isWeight) {
+                    shouldFadeWeight = true;
+                  }
+                }
 
                 return (
                   <Node
                     key={nodeIndex}
-                    className="node"
+                    className={cellClassName}
                     isStart={isStart}
                     col={col}
                     isWall={isWall}
                     row={row}
                     isWeight={isWeight}
                     isFinish={isFinish}
+                    shouldFadeWeight={shouldFadeWeight}
                     node={node}
                     handleMouseDown={(row, col) =>
                       isStart

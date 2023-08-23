@@ -41,6 +41,7 @@
 
 .weight-fade {
   opacity: 0.5;
+  transition: opacity 0.5s ease;
 }
 
 .finish-icon {
@@ -72,15 +73,15 @@
 }
 
 .node-visited-second {
-  animation-name: visitedAnimationSecond !important;
-  animation-duration: 1.5s !important;
-  animation-timing-function: ease-out !important;
-  animation-delay: 0 !important;
-  animation-direction: alternate !important;
-  animation-iteration-count: 1 !important;
-  animation-fill-mode: forwards !important;
-  animation-play-state: running !important;
-  border: 1px solid rgb(175, 216, 248) !important;
+  animation-name: visitedAnimationSecond;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+  border: 1px solid rgb(175, 216, 248);
 }
 
 .node-dragging {
