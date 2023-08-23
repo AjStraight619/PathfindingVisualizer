@@ -13,12 +13,7 @@ import Legend from "../components/Legend";
 import "./Pathfinding.css";
 import "./Node/Node.css";
 
-import {
-  START_NODE_COL,
-  START_NODE_ROW,
-  FINISH_NODE_ROW,
-  FINISH_NODE_COL,
-} from "../PathFindingUtils";
+import { START_NODE_COL, START_NODE_ROW } from "../PathFindingUtils";
 import aStar from "../Algorithms/aStar";
 import dijkstra from "../Algorithms/dijkstra";
 import depthFirstSearch from "../Algorithms/depthFirstSearch";
@@ -143,16 +138,9 @@ const PathFinding = () => {
     col: START_NODE_COL,
   });
 
-  const [finishNode, setFinishNode] = useState<NodeType>({
-    ...defaultNode,
-    row: FINISH_NODE_ROW,
-    col: FINISH_NODE_COL,
-  });
-
   const [grid, setGrid] = useState<NodeType[][]>(getInitialGrid());
-  const [animationStopped, setAnimationStopped] = useState(false);
   const [visualizingAlgorithm, setVisualizingAlgorithm] = useState(false);
-  const [generatingMaze, setGeneratingMaze] = useState(false);
+  // const [generatingMaze, setGeneratingMaze] = useState(false);
   const [speed, setSpeed] = useState(10);
   const [comparisonMode, setComparisonMode] = useState(false);
   const [isWeightToggled, setIsWeightToggled] = useState(false);
@@ -160,7 +148,6 @@ const PathFinding = () => {
   const [isAlgoSelected, setIsAlgoSelected] = useState(false);
   const [selectedMaze, setSelectedMaze] = useState<Maze[]>([]);
   const [selectedSpeed, setSelectedSpeed] = useState("Fast");
-  const [hasMaze, setHasMaze] = useState(false);
 
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
   const [draggedNode, setDraggedNode] = useState<{
@@ -169,7 +156,6 @@ const PathFinding = () => {
   } | null>(null);
   const [dragType, setDragType] = useState("");
   const [tutorialOpen, setTutorialOpen] = useState(true);
-  const [algorithmVisualized, setAlgorithmVisualized] = useState(false);
 
   useEffect(() => {
     const initialGrid = getInitialGrid();
@@ -177,47 +163,52 @@ const PathFinding = () => {
   }, []);
 
   const handleMouseDown = (row: number, col: number) => {
-    let newGrid: NodeType[][];
-    if (isWeightToggled) {
-      newGrid = getNewGridWithWeightToggled(grid, row, col);
-    } else {
-      newGrid = getNewGridWithWallToggled(grid, row, col);
-    }
-    setGrid(newGrid);
-    setMouseIsPressed(true);
-  };
-
-  const handleMouseUp = () => {
-    setMouseIsPressed(false);
-    setDraggedNode(null);
-  };
-
-  const handleMouseEnter = (row: number, col: number) => {
-    if (!mouseIsPressed) return;
-
-    if (draggedNode) {
-      const newGrid = grid.slice();
-
-      newGrid[draggedNode.row][draggedNode.col] = {
-        ...newGrid[draggedNode.row][draggedNode.col],
-        isStart: false,
-      };
-
-      newGrid[row][col] = {
-        ...newGrid[row][col],
-        isStart: true,
-      };
-
-      setGrid(newGrid);
-      setDraggedNode({ row, col });
-    } else {
-      let newGrid;
+    if (!visualizingAlgorithm) {
+      let newGrid: NodeType[][];
       if (isWeightToggled) {
         newGrid = getNewGridWithWeightToggled(grid, row, col);
       } else {
         newGrid = getNewGridWithWallToggled(grid, row, col);
       }
       setGrid(newGrid);
+      setMouseIsPressed(true);
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (!visualizingAlgorithm) {
+      setMouseIsPressed(false);
+      setDraggedNode(null);
+    }
+  };
+
+  const handleMouseEnter = (row: number, col: number) => {
+    if (!mouseIsPressed) return;
+    if (!visualizingAlgorithm) {
+      if (draggedNode) {
+        const newGrid = grid.slice();
+
+        newGrid[draggedNode.row][draggedNode.col] = {
+          ...newGrid[draggedNode.row][draggedNode.col],
+          isStart: false,
+        };
+
+        newGrid[row][col] = {
+          ...newGrid[row][col],
+          isStart: true,
+        };
+
+        setGrid(newGrid);
+        setDraggedNode({ row, col });
+      } else {
+        let newGrid;
+        if (isWeightToggled) {
+          newGrid = getNewGridWithWeightToggled(grid, row, col);
+        } else {
+          newGrid = getNewGridWithWallToggled(grid, row, col);
+        }
+        setGrid(newGrid);
+      }
     }
   };
 
@@ -243,7 +234,7 @@ const PathFinding = () => {
   };
 
   const handleStartNodeMouseDown = (row: number, col: number) => {
-    if (startNode.row === row && startNode.col === col)
+    if (startNode.row === row && startNode.col === col && !visualizingAlgorithm)
       setDraggedNode(startNode);
     setDragType("start");
   };
@@ -335,7 +326,6 @@ const PathFinding = () => {
     if (comparisonMode && algorithms.length !== 2) {
       throw new Error(`Comparison mode requires exactly 2 algorithms`);
     }
-    setAlgorithmVisualized(false);
     setVisualizingAlgorithm(true);
 
     const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
@@ -368,20 +358,19 @@ const PathFinding = () => {
         `nodesInShortestPathOrder for ${algorithm.name}`,
         nodesInShortestPathOrder
       );
-      setAlgorithmVisualized(true);
 
       animate(visitedNodesInOrder, nodesInShortestPathOrder);
     });
   };
 
-  const visualizeAlgorithmWhenDragged = (algorithm: Algorithm[]) => {
-    if (visualizingAlgorithm || comparisonMode) return;
+  // const visualizeAlgorithmWhenDragged = (algorithm: Algorithm[]) => {
+  //   if (visualizingAlgorithm || comparisonMode) return;
 
-    const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
-    const finish = grid.flatMap((row) =>
-      row.filter((node) => node.isFinish)
-    )[0];
-  };
+  //   const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
+  //   const finish = grid.flatMap((row) =>
+  //     row.filter((node) => node.isFinish)
+  //   )[0];
+  // };
   const animate = (
     visitedNodesInOrder: NodeType[],
     nodesInShortestPathOrder: NodeType[]
@@ -524,39 +513,39 @@ const PathFinding = () => {
     }, speed * Math.max(paths[0].visitedNodesInOrder.length, paths[1].visitedNodesInOrder.length) + speed * Math.max(paths[0].nodesInShortestPathOrder.length, paths[1].nodesInShortestPathOrder.length));
   };
 
-  const generateRecursiveDivisionMaze = () => {
-    if (visualizingAlgorithm || generatingMaze) {
-      return;
-    }
-    setGeneratingMaze(true);
-    setTimeout(() => {
-      const startNode = grid[START_NODE_ROW][START_NODE_COL];
-      const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-      const walls = recursiveDivisionMaze(grid, startNode, finishNode);
-      animateMaze(walls);
-    }, speed);
-  };
+  // const generateRecursiveDivisionMaze = () => {
+  //   if (visualizingAlgorithm || generatingMaze) {
+  //     return;
+  //   }
+  //   setGeneratingMaze(true);
+  //   setTimeout(() => {
+  //     const startNode = grid[START_NODE_ROW][START_NODE_COL];
+  //     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+  //     const walls = recursiveDivisionMaze(grid, startNode, finishNode);
+  //     animateMaze(walls);
+  //   }, speed);
+  // };
 
-  const generateRandomMaze = () => {
-    if (visualizingAlgorithm || generatingMaze || hasMaze) {
-      return;
-    }
-    setGeneratingMaze(true);
-    setTimeout(() => {
-      const startNode = grid[START_NODE_ROW][START_NODE_COL];
-      const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-      const walls = recursiveDivisionMaze(grid, startNode, finishNode);
-      animateMaze(walls);
-    }, speed);
-  };
+  // const generateRandomMaze = () => {
+  //   if (visualizingAlgorithm || generatingMaze) {
+  //     return;
+  //   }
+  //   setGeneratingMaze(true);
+  //   setTimeout(() => {
+  //     const startNode = grid[START_NODE_ROW][START_NODE_COL];
+  //     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+  //     const walls = recursiveDivisionMaze(grid, startNode, finishNode);
+  //     animateMaze(walls);
+  //   }, speed);
+  // };
 
-  const generateCurMaze = () => {
-    if (selectedMaze[0].name === "DFS") {
-      generateRecursiveDivisionMaze();
-    } else if (selectedMaze[0].name === "Random Maze") {
-      generateRandomMaze();
-    }
-  };
+  // const generateCurMaze = () => {
+  //   if (selectedMaze[0].name === "DFS") {
+  //     generateRecursiveDivisionMaze();
+  //   } else if (selectedMaze[0].name === "Random Maze") {
+  //     generateRandomMaze();
+  //   }
+  // };
 
   const animateShortestPath = (nodesInShortestPathOrder: NodeType[]): void => {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
@@ -642,8 +631,6 @@ const PathFinding = () => {
   };
 
   const clearVisualization = () => {
-    setAnimationStopped(true);
-
     const updatedGrid = grid.map((row) =>
       row.map((node) => {
         const nodeId = `node-${node.row}-${node.col}`;
@@ -668,7 +655,6 @@ const PathFinding = () => {
 
     setGrid(updatedGrid);
     setVisualizingAlgorithm(false);
-    setAnimationStopped(false);
   };
 
   const clearBoard = () => {
@@ -721,7 +707,7 @@ const PathFinding = () => {
           toggleWeights={toggleWeights}
           setSpeed={setSpeed}
           toggleComparisonMode={toggleComparisonMode}
-          generatingMaze={generatingMaze}
+          // generatingMaze={generatingMaze}
           speedSelection={speedSelection}
           speedMapping={speedMapping}
           speedSelected={0}
@@ -809,14 +795,3 @@ const PathFinding = () => {
 };
 
 export default PathFinding;
-function recursiveDivisionMaze(
-  grid: NodeType[][],
-  startNode: NodeType,
-  finishNode: NodeType
-) {
-  throw new Error("Function not implemented.");
-}
-
-function animateMaze(walls: void) {
-  throw new Error("Function not implemented.");
-}

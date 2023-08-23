@@ -25,7 +25,7 @@ interface MyNavbarProps {
   toggleWeights: () => void;
   setSpeed: (speed: number) => void;
   toggleComparisonMode: () => void;
-  generatingMaze: boolean;
+  // generatingMaze: boolean;
   selectedMaze: Maze[];
   mazeMapping: { [key: string]: Maze };
   speedMapping: { [key: string]: number };
@@ -44,12 +44,9 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
     algoSelection,
     isWeightToggled,
     toggleWeights,
-    // generateCurMaze,
-    speed,
     toggleComparisonMode,
     clearBoard,
     clearVisualization,
-    // currentMazeType,
     mazeSelection,
     algorithmMapping,
     mazeMapping,

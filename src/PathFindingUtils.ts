@@ -1,4 +1,4 @@
-import { GridProps, NodeType } from "./types/types";
+import { NodeType } from "./types/types";
 
 export const START_NODE_ROW = 19;
 export const START_NODE_COL = 8;
