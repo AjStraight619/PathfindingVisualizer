@@ -74,4 +74,9 @@ export interface Algorithm {
 export interface Maze {
   id: string;
   name: string;
+  func?: (
+    grid: NodeType[][],
+    startNode: NodeType,
+    finishNode: NodeType
+  ) => NodeType[];
 }

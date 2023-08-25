@@ -26,6 +26,7 @@ interface MyNavbarProps {
   setSpeed: (speed: number) => void;
   toggleComparisonMode: () => void;
   // generatingMaze: boolean;
+  generateMaze: (mazeSelection: Maze[]) => void;
   selectedMaze: Maze[];
   mazeMapping: { [key: string]: Maze };
   speedMapping: { [key: string]: number };
@@ -53,6 +54,7 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
     speedMapping,
     speedSelection,
     toggleTutorial,
+    generateMaze,
     selectedSpeed,
   } = props;
   return (
@@ -90,7 +92,11 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
                     ? selectedAlgorithms[0].name
                     : ""}
                 </Button>
-                <Button className="ml-2" variant="secondary">
+                <Button
+                  className="ml-2"
+                  variant="secondary"
+                  onClick={() => generateMaze(selectedMaze)}
+                >
                   Generate {selectedMaze.length > 0 ? selectedMaze[0].name : ""}
                 </Button>
               </ButtonGroup>

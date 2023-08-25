@@ -4,6 +4,7 @@ import {
   getNodesInShortestPathOrder,
   getNewGridWithWeightToggled,
   getNewGridWithWallToggled,
+  getNewGridWithMaze,
 } from "../PathFindingUtils";
 import { NodeType, Algorithm, Maze } from "../types/types";
 import Node from "./Node/Node";
@@ -22,6 +23,7 @@ import beamSearch from "../Algorithms/beamSearch";
 import bestFirstSearch from "../Algorithms/bestFirstSearch";
 import greedyBFS from "../Algorithms/greedyBFS";
 import { Tutorial } from "../components/Tutorial";
+import recursiveDivisionMaze from "../Mazes/recursiveDivision";
 
 const PathFinding = () => {
   const algoMapping: { [key: string]: Algorithm } = {
@@ -90,20 +92,20 @@ const PathFinding = () => {
   };
 
   const mazeMapping: { [key: string]: Maze } = {
-    "Depth-First Search": {
-      name: "DFS Maze",
-      id: "DFSMaze",
-    },
+    // "Depth-First Search": {
+    //   name: "DFS Maze",
+    //   id: "DFSMaze",
+    // },
 
     "Recursive Division": {
       name: "Recursive Division",
       id: "Recursive Division",
     },
 
-    "Random Maze": {
-      name: "Random Maze",
-      id: "Random Maze",
-    },
+    // "Random Maze": {
+    //   name: "Random Maze",
+    //   id: "Random Maze",
+    // },
   };
 
   const speedMapping: { [key: string]: number } = {
@@ -140,7 +142,7 @@ const PathFinding = () => {
 
   const [grid, setGrid] = useState<NodeType[][]>(getInitialGrid());
   const [visualizingAlgorithm, setVisualizingAlgorithm] = useState(false);
-  // const [generatingMaze, setGeneratingMaze] = useState(false);
+  const [generatingMaze, setGeneratingMaze] = useState(false);
   const [speed, setSpeed] = useState(10);
   const [comparisonMode, setComparisonMode] = useState(false);
   const [isWeightToggled, setIsWeightToggled] = useState(false);
@@ -326,6 +328,7 @@ const PathFinding = () => {
     if (comparisonMode && algorithms.length !== 2) {
       throw new Error(`Comparison mode requires exactly 2 algorithms`);
     }
+    console.log("calling algo");
     setVisualizingAlgorithm(true);
 
     const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
@@ -513,18 +516,54 @@ const PathFinding = () => {
     }, speed * Math.max(paths[0].visitedNodesInOrder.length, paths[1].visitedNodesInOrder.length) + speed * Math.max(paths[0].nodesInShortestPathOrder.length, paths[1].nodesInShortestPathOrder.length));
   };
 
-  // const generateRecursiveDivisionMaze = () => {
-  //   if (visualizingAlgorithm || generatingMaze) {
-  //     return;
-  //   }
-  //   setGeneratingMaze(true);
-  //   setTimeout(() => {
-  //     const startNode = grid[START_NODE_ROW][START_NODE_COL];
-  //     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
-  //     const walls = recursiveDivisionMaze(grid, startNode, finishNode);
-  //     animateMaze(walls);
-  //   }, speed);
-  // };
+  const generateRecursiveDivisionMaze = () => {
+    if (visualizingAlgorithm || generatingMaze) {
+      return;
+    }
+    setGeneratingMaze(true);
+    setTimeout(() => {
+      const start = grid.flatMap((row) =>
+        row.filter((node) => node.isStart)
+      )[0];
+      const finish = grid.flatMap((row) =>
+        row.filter((node) => node.isFinish)
+      )[0];
+      const walls: false | [number, number][] = recursiveDivisionMaze(
+        grid,
+        start,
+        finish
+      );
+
+      if (walls !== false) {
+        animateMaze(walls);
+      }
+    }, speed);
+  };
+
+  const animateMaze = (walls: [number, number][]) => {
+    for (let i = 0; i <= walls.length; i++) {
+      if (i === walls.length) {
+        setTimeout(() => {
+          let newGrid = getNewGridWithMaze(grid, walls);
+          setGrid(newGrid);
+          setGeneratingMaze(false);
+        }, i * speed);
+        return;
+      }
+      let wall = walls[i];
+      let node = grid[wall[0]][wall[1]];
+      setTimeout(() => {
+        const element = document.getElementById(`node-${node.row}-${node.col}`);
+        if (element) {
+          if (element.classList.contains("node-weight")) {
+            element.className = "node node-wall-animated node-weight";
+          } else {
+            element.className = "node node-wall-animated";
+          }
+        }
+      }, i * speed);
+    }
+  };
 
   // const generateRandomMaze = () => {
   //   if (visualizingAlgorithm || generatingMaze) {
@@ -539,13 +578,14 @@ const PathFinding = () => {
   //   }, speed);
   // };
 
-  // const generateCurMaze = () => {
-  //   if (selectedMaze[0].name === "DFS") {
-  //     generateRecursiveDivisionMaze();
-  //   } else if (selectedMaze[0].name === "Random Maze") {
-  //     generateRandomMaze();
-  //   }
-  // };
+  const generateMaze = (selectedMaze: Maze[]) => {
+    if (
+      selectedMaze.length > 0 &&
+      selectedMaze[0].name === "Recursive Division"
+    ) {
+      generateRecursiveDivisionMaze();
+    }
+  };
 
   const animateShortestPath = (nodesInShortestPathOrder: NodeType[]): void => {
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
@@ -707,7 +747,7 @@ const PathFinding = () => {
           toggleWeights={toggleWeights}
           setSpeed={setSpeed}
           toggleComparisonMode={toggleComparisonMode}
-          // generatingMaze={generatingMaze}
+          generateMaze={generateMaze}
           speedSelection={speedSelection}
           speedMapping={speedMapping}
           speedSelected={0}
