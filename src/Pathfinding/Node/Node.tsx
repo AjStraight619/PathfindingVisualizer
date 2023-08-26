@@ -8,11 +8,11 @@ const Node: React.FC<NodeProps> = ({
   handleMouseDown,
   handleMouseUp,
   handleMouseEnter,
-  handleMouseMove,
   handleDragStart,
   handleDrop,
-  handleDragEnd,
   shouldFadeWeight,
+  onMove,
+  handleDragEnd,
 }) => {
   const { row, col, isStart, isFinish, isWall, isWeight, isDraggable } = node;
 
@@ -28,15 +28,9 @@ const Node: React.FC<NodeProps> = ({
 
   const nodeClasses = `node ${extra}`;
 
-  const onDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    handleDragEnd(row, col);
-  };
-
-  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    handleMouseMove(row, col);
-  };
+  // const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  //   e.preventDefault();
+  // };
 
   return (
     <div
@@ -47,10 +41,10 @@ const Node: React.FC<NodeProps> = ({
       onMouseEnter={() => handleMouseEnter(row, col)}
       onMouseUp={() => handleMouseUp()}
       onDragStart={(e) => handleDragStart(e, node, row, col)}
-      onDragOver={onMove}
+      onDragOver={(e) => onMove(e, node, row, col)}
       onDrop={(e) => handleDrop(e, row, col)}
       onDrag={(e) => e.preventDefault()}
-      onDragEnd={onDragEnd}
+      onDragEnd={() => handleDragEnd(row, col)}
     >
       {isWeight ? (
         <span

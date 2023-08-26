@@ -123,3 +123,24 @@ export const getNeighbors = (
 
   return neighbors.filter((neighbor) => !neighbor.isVisited);
 };
+
+export const getNewGridWithUpdatedPath = (
+  grid: NodeType[][],
+  startNode: NodeType,
+  finishNode: NodeType,
+  algorithmFunc: (
+    grid: NodeType[][],
+    start: NodeType,
+    finish: NodeType
+  ) => NodeType[]
+): [NodeType[][], NodeType[]] => {
+  // Run the algorithm to get the new path
+  algorithmFunc(grid, startNode, finishNode);
+  const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+
+  // Update the grid state here based on the new path (you could make this part more sophisticated)
+  const newGrid = grid.slice();
+
+  // Return the new grid state and the new shortest path for further use or animation
+  return [newGrid, nodesInShortestPathOrder];
+};

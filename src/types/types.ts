@@ -29,7 +29,8 @@ export type NodeProps = {
   handleMouseDown: (row: number, col: number) => void;
   handleMouseUp: () => void;
   handleMouseEnter: (row: number, col: number) => void;
-  handleMouseMove: (row: number, col: number) => void;
+  handleDragEnd: (row: number, col: number) => void;
+
   handleDragStart: (
     e: React.DragEvent,
     startNode: NodeType,
@@ -37,9 +38,14 @@ export type NodeProps = {
     col: number
   ) => void;
   handleDrop: (e: React.DragEvent, row: number, col: number) => void;
-  handleDragEnd: (row: number, col: number) => void;
   className: string;
   shouldFadeWeight: boolean;
+  onMove: (
+    e: React.DragEvent,
+    node: NodeType,
+    row: number,
+    col: number
+  ) => void;
 };
 
 export type GridProps = {
@@ -80,3 +86,9 @@ export interface Maze {
     finishNode: NodeType
   ) => NodeType[];
 }
+
+export type StartNodeStateType = {
+  node: NodeType;
+  isDragging: boolean;
+  draggedNode: NodeType | null;
+};

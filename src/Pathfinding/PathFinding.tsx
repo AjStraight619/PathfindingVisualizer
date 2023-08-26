@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   getInitialGrid,
   getNodesInShortestPathOrder,
   getNewGridWithWeightToggled,
   getNewGridWithWallToggled,
   getNewGridWithMaze,
+  getNewGridWithUpdatedPath,
 } from "../PathFindingUtils";
-import { NodeType, Algorithm, Maze } from "../types/types";
+import { NodeType, Algorithm, Maze, StartNodeStateType } from "../types/types";
 import Node from "./Node/Node";
 
 import MyNavbar from "../components/MyNavbar";
@@ -134,10 +135,17 @@ const PathFinding = () => {
     className: "",
   };
 
-  const [startNode, setStartNode] = useState<NodeType>({
-    ...defaultNode,
-    row: START_NODE_ROW,
-    col: START_NODE_COL,
+  const [startNodeState, setStartNodeState] = useState<StartNodeStateType>({
+    node: {
+      ...defaultNode,
+      isDraggable: true,
+      className: "node-start",
+      isStart: true,
+      row: START_NODE_ROW,
+      col: START_NODE_COL,
+    },
+    isDragging: false,
+    draggedNode: null,
   });
 
   const [grid, setGrid] = useState<NodeType[][]>(getInitialGrid());
@@ -150,78 +158,242 @@ const PathFinding = () => {
   const [isAlgoSelected, setIsAlgoSelected] = useState(false);
   const [selectedMaze, setSelectedMaze] = useState<Maze[]>([]);
   const [selectedSpeed, setSelectedSpeed] = useState("Fast");
+  const [hasAlgorithmRun, setHasAlgorithmRun] = useState(false);
 
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
-  const [draggedNode, setDraggedNode] = useState<{
-    row: number;
-    col: number;
-  } | null>(null);
-  const [dragType, setDragType] = useState("");
+
   const [tutorialOpen, setTutorialOpen] = useState(true);
 
+  const lastPosition = useRef<{ row: number | null; col: number | null }>({
+    row: null,
+    col: null,
+  });
   useEffect(() => {
     const initialGrid = getInitialGrid();
     setGrid(initialGrid);
   }, []);
 
-  const handleMouseDown = (row: number, col: number) => {
-    if (!visualizingAlgorithm) {
-      let newGrid: NodeType[][];
-      if (isWeightToggled) {
-        newGrid = getNewGridWithWeightToggled(grid, row, col);
-      } else {
-        newGrid = getNewGridWithWallToggled(grid, row, col);
-      }
-      setGrid(newGrid);
-      setMouseIsPressed(true);
+  // Call onMove when the startNode is being dragged
+  const onMove = (
+    e: React.DragEvent,
+    node: NodeType,
+    row: number,
+    col: number
+  ) => {
+    e.preventDefault();
+    console.log("in onMove");
+    // If not dragging the start node, do nothing
+    if (!startNodeState.isDragging) {
+      return;
     }
+
+    // Your existing checks and logic
+    const isValid =
+      row >= 0 && row < grid.length && col >= 0 && col < grid[0].length;
+
+    if (!isValid || node.isWall || node.isWeight) {
+      return;
+    }
+
+    if (row !== lastPosition.current.row || col !== lastPosition.current.col) {
+      if (hasAlgorithmRun) {
+        console.log("in onMove, hasAlgorithmRun:", hasAlgorithmRun);
+        updateShortestPath(row, col);
+      }
+      lastPosition.current = { row, col };
+    }
+  };
+
+  // Gpt 4 implementation
+
+  // const onMove = (
+  //   e: React.DragEvent,
+  //   node: NodeType,
+  //   row: number,
+  //   col: number
+  // ) => {
+  //   e.preventDefault();
+  //   console.log("onMove called");
+
+  //   // Early exit if not dragging the start node
+  //   if (!isDraggingStartNode) {
+  //     console.log("Not dragging start node");
+  //     return;
+  //   }
+
+  //   // Check for valid move
+  //   const isValid =
+  //     row >= 0 && row < grid.length && col >= 0 && col < grid[0].length;
+
+  //   if (!isValid || node.isWall || node.isWeight) {
+  //     console.log("Invalid move");
+  //     return;
+  //   }
+
+  //   // Only update if the position has actually changed
+  //   if (row !== lastPosition.current.row || col !== lastPosition.current.col) {
+  //     console.log("Position changed");
+
+  //     // Create a shallow copy of the grid
+  //     const newGrid = grid.map((row) => row.slice());
+
+  //     // Reset the old start node
+  //     if (
+  //       lastPosition.current.row !== null &&
+  //       lastPosition.current.col !== null
+  //     ) {
+  //       newGrid[lastPosition.current.row][lastPosition.current.col].isStart =
+  //         false;
+  //     }
+
+  //     // Set the new start node
+  //     newGrid[row][col].isStart = true;
+
+  //     // Update the last position
+  //     lastPosition.current = { row, col };
+
+  //     // Update the state with the new grid, and then run updateShortestPath
+  //     setGrid(newGrid, () => {
+  //       updateShortestPath(row, col); // Adjust this call if needed
+  //       console.log("State and shortest path updated");
+  //     });
+  //   }
+  // };
+
+  const updateShortestPath = (updatedRow: number, updatedCol: number) => {
+    const updatedStartNode: NodeType = {
+      ...startNodeState.node,
+      row: updatedRow,
+      col: updatedCol,
+    };
+
+    const finish = grid.flatMap((row) =>
+      row.filter((node) => node.isFinish)
+    )[0];
+    const algorithm = selectedAlgorithms[0];
+    if (!algorithm || !algorithm.func) {
+      console.error("No algorithm selected or algorithm function is undefined");
+      return;
+    }
+
+    // Using the utility function to update grid and get the new shortest path
+    const [newGrid, newNodesInShortestPathOrder] = getNewGridWithUpdatedPath(
+      grid,
+      updatedStartNode,
+      finish,
+      algorithm.func
+    );
+
+    // Update your React state for grid
+    setGrid(newGrid);
+
+    clearVisualization();
+    animateShortestPathOnStartNodeDrag(newNodesInShortestPathOrder);
+  };
+
+  const animateShortestPathOnStartNodeDrag = (
+    nodesInShortestPathOrder: NodeType[]
+  ) => {
+    // Remove "node-shortest-path" class from all nodes
+    for (let row = 0; row < grid.length; row++) {
+      for (let col = 0; col < grid[row].length; col++) {
+        const element = document.getElementById(`node-${row}-${col}`);
+        if (element) {
+          element.classList.remove("node-updated-shortest-path");
+        }
+      }
+    }
+
+    // Add "node-shortest-path" class to nodes in the new shortest path
+    for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
+      const node = nodesInShortestPathOrder[i];
+      const element = document.getElementById(`node-${node.row}-${node.col}`);
+      if (element) {
+        element.className = "node node-updated-shortest-path";
+      }
+    }
+  };
+
+  const handleMouseDown = (row: number, col: number) => {
+    if (visualizingAlgorithm) return;
+
+    let newGrid = isWeightToggled
+      ? getNewGridWithWeightToggled(grid, row, col)
+      : getNewGridWithWallToggled(grid, row, col);
+
+    setGrid(newGrid);
+    setMouseIsPressed(true);
   };
 
   const handleMouseUp = () => {
     if (!visualizingAlgorithm) {
       setMouseIsPressed(false);
-      setDraggedNode(null);
     }
   };
+
+  // const handleMouseEnter = (row: number, col: number) => {
+  //   if (!mouseIsPressed || visualizingAlgorithm) return;
+
+  //   let newGrid = [...grid];
+  //   if (draggedNode) {
+  //     // Reset the old start node
+  //     newGrid[draggedNode.row][draggedNode.col] = {
+  //       ...newGrid[draggedNode.row][draggedNode.col],
+  //       isStart: false,
+  //     };
+
+  //     // Set the new start node
+  //     newGrid[row][col] = {
+  //       ...newGrid[row][col],
+  //       isStart: true,
+  //     };
+
+  //     setDraggedNode({ row, col });
+  //   } else {
+  //     // Handle wall or weight toggling logic
+  //     newGrid = isWeightToggled
+  //       ? getNewGridWithWeightToggled(grid, row, col)
+  //       : getNewGridWithWallToggled(grid, row, col);
+  //   }
+
+  //   setGrid(newGrid);
+  // };
+
+  // const handleMouseEnter = (row: number, col: number) => {
+  //   if (!mouseIsPressed || visualizingAlgorithm) return;
+
+  //   let newGrid = [...grid];
+  //   if (isDraggingStartNode && draggedNode) {
+  //     // Reset the old start node
+  //     newGrid[draggedNode.row][draggedNode.col] = {
+  //       ...newGrid[draggedNode.row][draggedNode.col],
+  //       isStart: false,
+  //     };
+
+  //     // Set the new start node
+  //     newGrid[row][col] = {
+  //       ...newGrid[row][col],
+  //       isStart: true,
+  //     };
+
+  //     setDraggedNode({ row, col });
+  //   } else {
+  //     // Handle wall or weight toggling logic
+  //     newGrid = isWeightToggled
+  //       ? getNewGridWithWeightToggled(grid, row, col)
+  //       : getNewGridWithWallToggled(grid, row, col);
+  //   }
+
+  //   setGrid(newGrid);
+  // };
 
   const handleMouseEnter = (row: number, col: number) => {
-    if (!mouseIsPressed) return;
-    if (!visualizingAlgorithm) {
-      if (draggedNode) {
-        const newGrid = grid.slice();
+    if (!mouseIsPressed || visualizingAlgorithm) return;
 
-        newGrid[draggedNode.row][draggedNode.col] = {
-          ...newGrid[draggedNode.row][draggedNode.col],
-          isStart: false,
-        };
-
-        newGrid[row][col] = {
-          ...newGrid[row][col],
-          isStart: true,
-        };
-
-        setGrid(newGrid);
-        setDraggedNode({ row, col });
-      } else {
-        let newGrid;
-        if (isWeightToggled) {
-          newGrid = getNewGridWithWeightToggled(grid, row, col);
-        } else {
-          newGrid = getNewGridWithWallToggled(grid, row, col);
-        }
-        setGrid(newGrid);
-      }
-    }
-  };
-
-  const handleMouseMove = (row: number, col: number) => {
-    if (!mouseIsPressed) return;
-
-    if (draggedNode) {
-      const newGrid = grid.slice();
-
-      newGrid[draggedNode.row][draggedNode.col] = {
-        ...newGrid[draggedNode.row][draggedNode.col],
+    let newGrid = [...grid];
+    if (startNodeState.isDragging) {
+      newGrid[startNodeState.node.row][startNodeState.node.col] = {
+        ...newGrid[startNodeState.node.row][startNodeState.node.col],
         isStart: false,
       };
 
@@ -230,23 +402,81 @@ const PathFinding = () => {
         isStart: true,
       };
 
-      setGrid(newGrid);
-      setDraggedNode({ row, col });
+      setStartNodeState((prevState) => ({
+        ...prevState,
+        node: {
+          ...prevState.node,
+          row: row,
+          col: col,
+        },
+      }));
+    } else {
+      newGrid = isWeightToggled
+        ? getNewGridWithWeightToggled(grid, row, col)
+        : getNewGridWithWallToggled(grid, row, col);
+    }
+
+    setGrid(newGrid);
+  };
+
+  const handleDragEnd = (row: number, col: number) => {
+    // Reset dragging state
+
+    // Reset the last known position of the dragged node
+    lastPosition.current = { row: null, col: null };
+
+    const newGrid = grid.slice();
+    const node = newGrid[row][col];
+    const newNode = {
+      ...node,
+      isStart: node.isStart,
+      isDraggable: node.isStart,
+    };
+    newGrid[row][col] = newNode;
+    if (newNode.isWall) return;
+    setGrid(newGrid);
+    console.log("dragEnd called", row, col);
+
+    setMouseIsPressed(false);
+
+    const nodeElement = document.getElementById(`node-${row}-${col}`);
+    if (nodeElement) {
+      nodeElement.classList.remove("dragging", "node-dragging");
+    }
+
+    if (startNodeState.isDragging) {
+      setStartNodeState((prevState) => ({
+        ...prevState,
+        isDragging: false,
+        node: {
+          ...prevState.node,
+          row: row,
+          col: col,
+        },
+      }));
     }
   };
 
   const handleStartNodeMouseDown = (row: number, col: number) => {
-    if (startNode.row === row && startNode.col === col && !visualizingAlgorithm)
-      setDraggedNode(startNode);
-    setDragType("start");
+    if (
+      startNodeState.node.row === row &&
+      startNodeState.node.col === col &&
+      !visualizingAlgorithm
+    ) {
+      setStartNodeState((prevState) => ({
+        ...prevState,
+        isDragging: true,
+        draggedNode: prevState.node,
+      }));
+    }
   };
-
   const handleDragStart = (
     e: React.DragEvent,
     startNode: NodeType,
     row: number,
     col: number
   ) => {
+    // Existing code
     if (!grid[row][col].isDraggable) return;
     if (!e || !e.dataTransfer) return;
     e.dataTransfer.setData("text/plain", "start");
@@ -256,73 +486,95 @@ const PathFinding = () => {
       nodeElement.classList.add("dragging", "node-dragging");
     }
 
-    setDraggedNode(startNode);
+    // Update this part
+    setStartNodeState((prevState) => ({
+      ...prevState,
+      isDragging: true,
+      draggedNode: startNode,
+    }));
   };
 
   const handleDrop = (e: React.DragEvent, newRow: number, newCol: number) => {
     e.preventDefault();
 
-    if (!draggedNode) {
+    if (!startNodeState.draggedNode) {
       return; // Exit early if draggedNode is null or undefined
     }
 
-    const { row, col } = draggedNode;
+    const { row, col } = startNodeState.draggedNode;
     const newGrid = grid.slice();
 
     newGrid[row][col].isStart = false;
     newGrid[row][col].isDraggable = false; // Set isDraggable to false for the old node
 
-    newGrid[startNode.row][startNode.col].isStart = false;
+    newGrid[startNodeState.node.row][startNodeState.node.col].isStart = false;
 
-    if (dragType === "start") {
+    if (startNodeState.isDragging) {
       newGrid[newRow][newCol].isStart = true;
       newGrid[newRow][newCol].isDraggable = true; // Set isDraggable to true for the new node
+
       const newStartNode = {
         ...newGrid[newRow][newCol],
+        isDraggable: true,
         row: newRow,
         col: newCol,
         isStart: true,
+        className: "node-start",
       };
-      setStartNode(newStartNode);
-    }
 
-    setGrid(newGrid);
-    setDraggedNode(null);
-  };
+      if (newStartNode.isWall) return;
 
-  const handleDragEnd = (row: number, col: number) => {
-    const newGrid = grid.slice();
-    const node = newGrid[row][col];
-    const newNode = {
-      ...node,
-      isStart: node.isStart,
-      isDraggable: node.isStart,
-    };
-    newGrid[row][col] = newNode;
-    setGrid(newGrid);
-    setMouseIsPressed(false);
-    setDraggedNode(null);
-
-    const nodeElement = document.getElementById(`node-${row}-${col}`);
-    if (nodeElement) {
-      nodeElement.classList.remove("dragging", "node-dragging");
-    }
-
-    if (dragType === "start") {
-      console.log(
-        "Start Node Row: ",
-        startNode.row,
-        "Start Node Col: ",
-        startNode.col
-      );
-      setStartNode((prevStartNode) => ({
-        ...prevStartNode,
-        row: row,
-        col: col,
-        isStart: true,
+      setStartNodeState((prevState) => ({
+        ...prevState,
+        isDragging: false,
+        draggedNode: null,
+        node: newStartNode,
       }));
     }
+
+    setGrid(newGrid);
+    setStartNodeState((prevState) => ({
+      ...prevState,
+      isDragging: false,
+      draggedNode: null,
+    }));
   };
+
+  // const handleDragEnd = (row: number, col: number) => {
+  //   console.log("Handle Drag End Called:", row, col);
+  //   const newGrid = grid.slice();
+  //   const node = newGrid[row][col];
+  //   const newNode = {
+  //     ...node,
+  //     isStart: node.isStart,
+  //     isDraggable: node.isStart,
+  //   };
+  //   newGrid[row][col] = newNode;
+  //   setGrid(newGrid);
+  //   setMouseIsPressed(false);
+  //   setDraggedNode(null);
+
+  //   const nodeElement = document.getElementById(`node-${row}-${col}`);
+  //   if (nodeElement) {
+  //     nodeElement.classList.remove("dragging", "node-dragging");
+  //   }
+
+  //   if (dragType === "start") {
+  //     console.log(
+  //       "Start Node Row: ",
+  //       startNode.row,
+  //       "Start Node Col: ",
+  //       startNode.col
+  //     );
+  //     setStartNode((prevStartNode) => ({
+  //       ...prevStartNode,
+  //       row: row,
+  //       col: col,
+  //       isStart: true,
+  //     }));
+  //     console.log("Start Node updated in handleDragEnd:", row, col);
+  //   }
+  // };
 
   const visualizeAlgorithm = (algorithms: Algorithm[]): void => {
     if (comparisonMode && algorithms.length !== 2) {
@@ -330,6 +582,7 @@ const PathFinding = () => {
     }
     console.log("calling algo");
     setVisualizingAlgorithm(true);
+    setHasAlgorithmRun(false);
 
     const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
     const finish = grid.flatMap((row) =>
@@ -382,6 +635,7 @@ const PathFinding = () => {
       setTimeout(() => {
         if (i === visitedNodesInOrder.length) {
           animateShortestPath(nodesInShortestPathOrder);
+          setHasAlgorithmRun(true);
         } else {
           const node = visitedNodesInOrder[i];
           const element = document.getElementById(
@@ -603,7 +857,21 @@ const PathFinding = () => {
       return;
     }
 
-    console.log(selectedAlgorithms.length);
+    const startNode = startNodeState?.node;
+
+    if (
+      !startNode ||
+      startNode.isWall ||
+      startNode.row < 0 ||
+      startNode.row >= grid.length ||
+      startNode.col < 0 ||
+      startNode.col >= grid[0].length
+    ) {
+      const initialGrid = getInitialGrid(); // Recreate the initial grid
+      setGrid(initialGrid); // Set the grid to the initial state
+      return;
+    }
+    clearVisualization();
 
     if (comparisonMode) {
       visualizeAlgorithmForComparisonMode(selectedAlgorithms);
@@ -693,6 +961,21 @@ const PathFinding = () => {
       })
     );
 
+    setGrid(updatedGrid);
+    setVisualizingAlgorithm(false);
+  };
+
+  const clearShortestPath = () => {
+    const updatedGrid = grid.map((row) =>
+      row.map((node) => {
+        const nodeId = `node-${node.row}-${node.col}`;
+        const element = document.getElementById(nodeId);
+        if (element && element.classList.contains("node-shortest-path")) {
+          element.classList.remove("node-shortest-path");
+        }
+        return node;
+      })
+    );
     setGrid(updatedGrid);
     setVisualizingAlgorithm(false);
   };
@@ -818,9 +1101,9 @@ const PathFinding = () => {
                     }
                     handleMouseEnter={handleMouseEnter}
                     handleMouseUp={handleMouseUp}
-                    handleMouseMove={handleMouseMove}
                     handleDragStart={handleDragStart}
                     handleDrop={handleDrop}
+                    onMove={onMove}
                     handleDragEnd={handleDragEnd}
                   />
                 );
