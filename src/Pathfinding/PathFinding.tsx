@@ -965,21 +965,6 @@ const PathFinding = () => {
     setVisualizingAlgorithm(false);
   };
 
-  const clearShortestPath = () => {
-    const updatedGrid = grid.map((row) =>
-      row.map((node) => {
-        const nodeId = `node-${node.row}-${node.col}`;
-        const element = document.getElementById(nodeId);
-        if (element && element.classList.contains("node-shortest-path")) {
-          element.classList.remove("node-shortest-path");
-        }
-        return node;
-      })
-    );
-    setGrid(updatedGrid);
-    setVisualizingAlgorithm(false);
-  };
-
   const clearBoard = () => {
     const newGrid = grid.map((row) =>
       row.map((node) =>
