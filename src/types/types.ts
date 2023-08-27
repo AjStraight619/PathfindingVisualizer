@@ -16,6 +16,8 @@ export type NodeType = {
   distance: number;
   totalDistance: number;
   className: string;
+  opened?: boolean;
+  closed?: boolean;
 };
 
 export type NodeProps = {
@@ -46,6 +48,7 @@ export type NodeProps = {
     row: number,
     col: number
   ) => void;
+  checkStartNodePosition: () => string;
 };
 
 export type GridProps = {

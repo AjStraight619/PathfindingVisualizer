@@ -30,7 +30,7 @@ const createNode = (row: number, col: number): NodeType => {
     isWeight: false,
     isVisited: false,
     hScore: 0,
-    gScore: 0,
+    gScore: Infinity,
     fScore: 0,
     closest: 0,
     totalDistance: 0,
@@ -39,6 +39,8 @@ const createNode = (row: number, col: number): NodeType => {
     weight: 1,
     isDraggable: isStart,
     className: "",
+    opened: false,
+    closed: false,
   };
 };
 

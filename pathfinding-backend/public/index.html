@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File Upload</title>
+</head>
+<body>
+  <h1>Upload a File</h1>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <!-- Changed the name to "myFile" to match the server configuration -->
+    <input type="file" id="fileInput" name="myFile">
+    <button type="submit">Upload</button>
+  </form>
+  
+  <script>
+    const uploadForm = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fileInput');
+    
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      formData.append('myFile', fileInput.files[0]); // Changed the name to "myFile" to match the server configuration
+      
+      try {
+        const response = await fetch('http://localhost:3000/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          alert('File uploaded successfully!');
+        } else {
+          alert('Failed to upload file');
+        }
+      } catch (error) {
+        alert('An error occurred: ' + error);
+      }
+    });
+  </script>
+</body>
+</html>

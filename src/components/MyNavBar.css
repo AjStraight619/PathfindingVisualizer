@@ -1,0 +1,22 @@
+.custom-button {
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .custom-primary-button {
+    background: linear-gradient(to right, #ff8c94, #a383e2);
+    color: white;
+  }
+  
+  .custom-secondary-button {
+    background: linear-gradient(to right, #ff8c94, #a383e2);
+    color: white;
+  }
+  
+  .custom-button:hover {
+    background-color: #ff8c94;
+  }

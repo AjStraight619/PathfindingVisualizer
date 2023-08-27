@@ -6,6 +6,7 @@ import {
   getNewGridWithWallToggled,
   getNewGridWithMaze,
   getNewGridWithUpdatedPath,
+  FINISH_NODE_ROW,
 } from "../PathFindingUtils";
 import { NodeType, Algorithm, Maze, StartNodeStateType } from "../types/types";
 import Node from "./Node/Node";
@@ -133,6 +134,8 @@ const PathFinding = () => {
     closest: Infinity,
     distance: Infinity,
     className: "",
+    opened: false,
+    closed: false,
   };
 
   const [startNodeState, setStartNodeState] = useState<StartNodeStateType>({
@@ -187,6 +190,7 @@ const PathFinding = () => {
       return;
     }
 
+    checkStartNodePosition();
     // Your existing checks and logic
     const isValid =
       row >= 0 && row < grid.length && col >= 0 && col < grid[0].length;
@@ -235,6 +239,26 @@ const PathFinding = () => {
     animateShortestPathOnStartNodeDrag(newNodesInShortestPathOrder);
   };
 
+  const checkStartNodePosition = (): string => {
+    const startNode = grid.flatMap((row) =>
+      row.filter((node) => node.isStart)
+    )[0];
+    const finishNode = grid.flatMap((row) =>
+      row.filter((node) => node.isFinish)
+    )[0];
+
+    if (startNode.col > finishNode.col)
+      // return chevron left (will specify in css class)
+      return "left";
+    else if (startNode.row > finishNode.row && startNode.col === finishNode.col)
+      // return chevron up
+      return "up";
+    else if (startNode.row < finishNode.row && startNode.col === finishNode.col)
+      // return chevron down
+      return "down";
+    else return "right";
+  };
+
   const animateShortestPathOnStartNodeDrag = (
     nodesInShortestPathOrder: NodeType[]
   ) => {
@@ -248,7 +272,7 @@ const PathFinding = () => {
       }
     }
 
-    // Add "node-shortest-path" class to nodes in the new shortest path
+    // Add "node-updated-shortest-path" class to nodes in the new shortest path
     for (let i = 0; i < nodesInShortestPathOrder.length; i++) {
       const node = nodesInShortestPathOrder[i];
       const element = document.getElementById(`node-${node.row}-${node.col}`);
@@ -388,6 +412,7 @@ const PathFinding = () => {
     if (!startNodeState.draggedNode) {
       return; // Exit early if draggedNode is null or undefined
     }
+    console.log("State of startNode when dropped", startNodeState);
 
     const { row, col } = startNodeState.draggedNode;
     const newGrid = grid.slice();
@@ -934,6 +959,7 @@ const PathFinding = () => {
                     handleDrop={handleDrop}
                     onMove={onMove}
                     handleDragEnd={handleDragEnd}
+                    checkStartNodePosition={checkStartNodePosition}
                   />
                 );
               })}

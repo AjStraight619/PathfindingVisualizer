@@ -150,8 +150,22 @@ export const Tutorial = (props: TutorialProps) => {
             <h3>About the Algorithms</h3>
             <p>
               There are four algorithms implemented in this pathfinding
-              visualizer: Dijkstra's Algorithm, A*, Breadth-First Search, and
-              Depth-First Search.
+              visualizer: Dijkstra's, A*, Breadth-First Search, Greedy
+              Best-First Search, Best-First Search, Beam Search and Depth-First
+              Search. All of these algorithms are unique in their own ways. A*
+              is going to be the overall most efficient algorithm because it
+              uses a heuristic to guide the search towards the goal node.
+              Dijkstra's is a weighted algorithm that is guaranteed to find the
+              shortest path, but it is slower than A* because it does not use a
+              heuristic. Breadth-First Search is an unweighted algorithm that is
+              guaranteed to find the shortest path, but it is slower than both
+              Dijkstra's and A*. Depth-First Search is an unweighted algorithm
+              that does not guarantee the shortest path, but it is faster than
+              all the other algorithms. Greedy Best-First Search is a weighted
+              algorithm that is similar to A*, but it does not guarantee the
+              shortest path. Beam Search is a variant of Best-First Search that
+              only explores a fixed number of nodes at each level of the search
+              tree.
             </p>
             <h4>Dijkstra's Algorithm:</h4>
             <p>
@@ -214,17 +228,22 @@ export const Tutorial = (props: TutorialProps) => {
               algorithm can quickly identify the shortest path between the start
               and goal nodes.
             </p>
-            <h4>Random Search:</h4>
+            <h4>Greedy Best-First Search:</h4>
             <p>
-              The random search algorithm is a type of uninformed search
-              algorithm that explores a search space by randomly selecting
-              unvisited nodes as the next nodes to visit. In this
-              implementation, the algorithm starts at the given start node, adds
-              its unvisited neighbors to a queue, and randomly shuffles the
-              queue before selecting the next node to visit. The process
-              continues until the finish node is reached or all nodes have been
-              visited. The algorithm returns the visited nodes in the order they
-              were explored.
+              Greedy Best-First Search is a search algorithm that aims to find
+              the optimal path from a starting node to a goal node in a graph or
+              a network. This algorithm explores the graph in a greedy manner,
+              by always choosing the next node that seems to be closest to the
+              goal node, according to some heuristic function.
+            </p>
+            <h4>Beam Search:</h4>
+            <p>
+              Beam Search is a variant of Best-First Search that only explores a
+              fixed number of nodes at each level of the search tree. It starts
+              at the starting vertex and explores the fixed number of nodes with
+              the lowest heuristic values, i.e., the nodes that are closest to
+              the goal node. It then expands the nodes at the next level of the
+              search tree and repeats the process until the goal node is found.
             </p>
             <button className="tutorial-close-button" onClick={props.onClose}>
               Close

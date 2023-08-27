@@ -1,6 +1,13 @@
 import React from "react";
 import "./Node.css";
-import { FiAnchor, FiChevronRight, FiCrosshair } from "react-icons/fi";
+import {
+  FiAnchor,
+  FiChevronRight,
+  FiCrosshair,
+  FiChevronDown,
+  FiChevronLeft,
+  FiChevronUp,
+} from "react-icons/fi";
 import { NodeProps } from "../../types/types";
 
 const Node: React.FC<NodeProps> = ({
@@ -13,6 +20,7 @@ const Node: React.FC<NodeProps> = ({
   shouldFadeWeight,
   onMove,
   handleDragEnd,
+  checkStartNodePosition,
 }) => {
   const { row, col, isStart, isFinish, isWall, isWeight, isDraggable } = node;
 
@@ -27,10 +35,7 @@ const Node: React.FC<NodeProps> = ({
     : "";
 
   const nodeClasses = `node ${extra}`;
-
-  // const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-  //   e.preventDefault();
-  // };
+  const direction = isStart ? checkStartNodePosition() : null;
 
   return (
     <div
@@ -46,15 +51,24 @@ const Node: React.FC<NodeProps> = ({
       onDrag={(e) => e.preventDefault()}
       onDragEnd={() => handleDragEnd(row, col)}
     >
-      {isWeight ? (
+      {isWeight && (
         <span
-          className={`weight-icon ${shouldFadeWeight ? "weight-fade" : ""}`} // <-- Use the new prop here
+          className={`weight-icon ${shouldFadeWeight ? "weight-fade" : ""}`}
         >
           <FiAnchor />
         </span>
-      ) : null}
-      {isStart ? <FiChevronRight className="start-icon" /> : null}
-      {isFinish ? <FiCrosshair className="finish-icon" /> : null}
+      )}
+
+      {isStart && (
+        <>
+          {direction === "left" && <FiChevronLeft className="start-icon" />}
+          {direction === "right" && <FiChevronRight className="start-icon" />}
+          {direction === "up" && <FiChevronUp className="start-icon" />}
+          {direction === "down" && <FiChevronDown className="start-icon" />}
+        </>
+      )}
+
+      {isFinish && <FiCrosshair className="finish-icon" />}
     </div>
   );
 };

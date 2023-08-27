@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 import {
   Navbar,
   Container,
@@ -10,6 +10,8 @@ import {
 } from "react-bootstrap";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Algorithm, Maze } from "../types/types";
+import { uploadFile } from "../api/fileUpload";
+import "./MyNavBar.css";
 
 interface MyNavbarProps {
   runAlgorithm: (selectedAlgorithms: Algorithm[]) => void;
@@ -57,6 +59,20 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
     generateMaze,
     selectedSpeed,
   } = props;
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadClick = () => {
+    console.log("clicked upload");
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      await uploadFile(file);
+    }
+  };
   return (
     <Router>
       <Navbar bg="dark" variant="dark" expand="lg" color="">
@@ -78,28 +94,31 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
               style={{ maxHeight: "150px" }}
               navbarScroll
             >
-              <ButtonGroup className="my-2">
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
                 <Button
-                  className={
-                    comparisonMode ? "comparison-button mr-2" : "primary mr-2"
-                  }
+                  className={`custom-button custom-primary-button ${
+                    comparisonMode ? "comparison-button" : "primary"
+                  }`}
                   onClick={() => runAlgorithm(selectedAlgorithms)}
                 >
-                  Visualize{" "}
-                  {comparisonMode
-                    ? selectedAlgorithms.map((algo) => algo.name).join(" vs ")
-                    : selectedAlgorithms && selectedAlgorithms.length > 0
-                    ? selectedAlgorithms[0].name
-                    : ""}
+                  {selectedAlgorithms.length > 0
+                    ? "Visualize Algorithm"
+                    : "Select an algorithm"}
                 </Button>
                 <Button
-                  className="ml-2"
-                  variant="secondary"
+                  className={`custom-button custom-secondary-button ml-auto ${
+                    selectedMaze.length === 0 && "disabled"
+                  }`}
                   onClick={() => generateMaze(selectedMaze)}
+                  disabled={selectedMaze.length === 0}
                 >
-                  Generate {selectedMaze.length > 0 ? selectedMaze[0].name : ""}
+                  {selectedMaze.length > 0
+                    ? `Generate ${selectedMaze[0].name}`
+                    : "Select a maze"}
                 </Button>
-              </ButtonGroup>
+              </div>
 
               <NavDropdown
                 title="Choose an Algorithm!"
@@ -162,7 +181,21 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
               <Nav.Link onClick={toggleTutorial}>Tutorial</Nav.Link>
             </Nav>
           </Navbar.Collapse>
-          <div className="ml-auto">
+          <input
+            type="file"
+            id="fileInput"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+          />
+          <div className="ml-auto d-flex align-items-center">
+            <Button
+              variant="outline-secondary" // removes background color
+              style={{ marginRight: "20px" }} // adds space to the right
+              onClick={handleUploadClick}
+            >
+              Upload File
+            </Button>
             <Button
               target="_blank"
               href="https://github.com/AjStraight619/PathfindingVisualizer"

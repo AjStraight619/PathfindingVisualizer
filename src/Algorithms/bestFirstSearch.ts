@@ -13,7 +13,7 @@ const bestFirstSearch = (
   startNode.distance = manhattanDistance(startNode, finishNode);
 
   while (openSet.length > 0) {
-    openSet.sort((a, b) => a.distance - b.distance);
+    openSet.sort((node1, node2) => node1.distance - node2.distance);
     const currentNode = openSet.shift();
 
     if (!currentNode || currentNode.isWall) continue;

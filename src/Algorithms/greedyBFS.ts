@@ -12,10 +12,11 @@ const greedyBFS = (
   openSet.push(startNode);
 
   while (openSet.length > 0) {
-    openSet.sort((node1, node2) => node1.totalDistance - node2.totalDistance);
+    openSet.sort((node1, node2) => node1.distance - node2.distance);
     const currentNode = openSet.shift();
 
     if (!currentNode) {
+      console.log("Broke out of loop");
       break; // Stop the loop if there's no current node
     }
 
@@ -25,21 +26,16 @@ const greedyBFS = (
 
     if (currentNode.isWall) continue;
     if (currentNode.distance === Infinity) return closedSet;
+
     closedSet.push(currentNode);
     removeFromArray(openSet, currentNode);
 
     const neighbors = getNeighbors(currentNode, grid);
     for (let i = 0; i < neighbors.length; i++) {
-      let distance = currentNode.distance + 1;
-
       const neighbor = neighbors[i];
       if (!closedSet.includes(neighbor) && !neighbor.isWall) {
         openSet.unshift(neighbor);
-        neighbor.totalDistance = getDistance(neighbor, finishNode);
-        neighbor.parent = currentNode;
-      } else if (distance < neighbor.distance) {
-        neighbor.distance = distance;
-        neighbor.totalDistance = getDistance(neighbor, finishNode);
+        neighbor.distance = manhattanDistance(neighbor, finishNode);
         neighbor.parent = currentNode;
       }
     }
@@ -58,10 +54,10 @@ function removeFromArray(
   }
 }
 
-function getDistance(currentNode: NodeType, finishNode: NodeType): number {
-  let d1 = Math.abs(finishNode.row - currentNode.row);
-  let d2 = Math.abs(finishNode.col - currentNode.col);
-  return d1 + d2;
+function manhattanDistance(node: NodeType, finishNode: NodeType): number {
+  return (
+    Math.abs(node.row - finishNode.row) + Math.abs(node.col - finishNode.col)
+  );
 }
 
 export default greedyBFS;
