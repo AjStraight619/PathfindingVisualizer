@@ -133,11 +133,13 @@ export const getNewGridWithUpdatedPath = (
   algorithmFunc: (
     grid: NodeType[][],
     start: NodeType,
-    finish: NodeType
-  ) => NodeType[]
+    finish: NodeType,
+    allowDiagonal: boolean
+  ) => NodeType[],
+  allowDiagonal: boolean
 ): [NodeType[][], NodeType[]] => {
   // Run the algorithm to get the new path
-  algorithmFunc(grid, startNode, finishNode);
+  algorithmFunc(grid, startNode, finishNode, allowDiagonal);
   const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
 
   // Update the grid state here based on the new path (you could make this part more sophisticated)
@@ -145,4 +147,26 @@ export const getNewGridWithUpdatedPath = (
 
   // Return the new grid state and the new shortest path for further use or animation
   return [newGrid, nodesInShortestPathOrder];
+};
+
+// diagonal implementation
+export const getNeighborsForDiagonal = (
+  node: NodeType,
+  grid: NodeType[][]
+): NodeType[] => {
+  const neighbors: NodeType[] = [];
+  const { row, col } = node;
+
+  if (row > 0) neighbors.push(grid[row - 1][col]);
+  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
+  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
+  if (col > 0) neighbors.push(grid[row][col - 1]);
+  if (row > 0 && col > 0) neighbors.push(grid[row - 1][col - 1]);
+  if (row < grid.length - 1 && col < grid[0].length - 1)
+    neighbors.push(grid[row + 1][col + 1]);
+  if (row > 0 && col < grid[0].length - 1)
+    neighbors.push(grid[row - 1][col + 1]);
+  if (row < grid.length - 1 && col > 0) neighbors.push(grid[row + 1][col - 1]);
+
+  return neighbors.filter((neighbor) => !neighbor.isVisited);
 };

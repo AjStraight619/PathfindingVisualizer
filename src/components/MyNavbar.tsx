@@ -1,9 +1,8 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import {
   Navbar,
   Container,
   Nav,
-  ButtonGroup,
   Button,
   NavDropdown,
   NavLink,
@@ -36,6 +35,8 @@ interface MyNavbarProps {
   speedSelection: (speed: string) => void;
   toggleTutorial: () => void;
   selectedSpeed: string;
+  toggleAllowDiagonalMovement: () => void;
+  allowDiagonalMovement: boolean;
 }
 
 const MyNavbar: React.FC<MyNavbarProps> = (props) => {
@@ -47,7 +48,7 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
     algoSelection,
     isWeightToggled,
     toggleWeights,
-    toggleComparisonMode,
+    // toggleComparisonMode,
     clearBoard,
     clearVisualization,
     mazeSelection,
@@ -58,6 +59,8 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
     toggleTutorial,
     generateMaze,
     selectedSpeed,
+    toggleAllowDiagonalMovement,
+    allowDiagonalMovement,
   } = props;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -168,10 +171,16 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
                 ))}
               </NavDropdown>
 
-              <Nav.Link onClick={toggleComparisonMode}>
+              {/* <Nav.Link onClick={toggleComparisonMode}>
                 {comparisonMode
                   ? "Exit Comparison Mode"
                   : "Enter Comparison Mode"}
+              </Nav.Link> */}
+
+              <Nav.Link onClick={toggleAllowDiagonalMovement}>
+                {allowDiagonalMovement
+                  ? "Disable Diagonal Movement"
+                  : "Enable Diagonal Movement"}
               </Nav.Link>
 
               <Nav.Link onClick={() => clearVisualization()}>

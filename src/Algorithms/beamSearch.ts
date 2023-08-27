@@ -1,9 +1,11 @@
 import { NodeType } from "../types/types";
+import { getNeighborsForDiagonal, getNeighbors } from "../PathFindingUtils";
 
 const beamSearch = (
   grid: NodeType[][],
   startNode: NodeType,
   finishNode: NodeType,
+  allowDiagonal: boolean,
   beamWidth = 3
 ): NodeType[] | null => {
   let openSet: NodeType[] = [startNode];
@@ -22,7 +24,9 @@ const beamSearch = (
       currentNode.isVisited = true;
       closedSet.push(currentNode);
 
-      const neighbors = getNeighbors(currentNode, grid);
+      const neighbors = allowDiagonal
+        ? getNeighborsForDiagonal(currentNode, grid)
+        : getNeighbors(currentNode, grid);
 
       for (const neighbor of neighbors) {
         if (!closedSet.includes(neighbor) && !neighbor.isWall) {
@@ -40,28 +44,6 @@ const beamSearch = (
 
   return null;
 };
-
-function getNeighbors(node: NodeType, grid: NodeType[][]): NodeType[] {
-  const neighbors: NodeType[] = [];
-
-  const { col, row } = node;
-
-  if (row > 0) {
-    neighbors.push(grid[row - 1][col]);
-  }
-  if (row < grid.length - 1) {
-    neighbors.push(grid[row + 1][col]);
-  }
-  if (col > 0) {
-    neighbors.push(grid[row][col - 1]);
-  }
-  if (col < grid[0].length - 1) {
-    neighbors.push(grid[row][col + 1]);
-  }
-  return neighbors.filter(
-    (neighbor) => !neighbor.isVisited && !neighbor.isWall
-  );
-}
 
 function heuristic(node: NodeType, finishNode: NodeType): number {
   const dx = Math.abs(node.row - finishNode.row);

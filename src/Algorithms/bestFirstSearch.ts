@@ -1,10 +1,11 @@
 import { NodeType } from "../types/types";
-import { getNeighbors } from "../PathFindingUtils";
+import { getNeighbors, getNeighborsForDiagonal } from "../PathFindingUtils";
 
 const bestFirstSearch = (
   grid: NodeType[][],
   startNode: NodeType,
-  finishNode: NodeType
+  finishNode: NodeType,
+  allowDiagonal: boolean
 ): NodeType[] => {
   const openSet: NodeType[] = [startNode];
   const closedSet: NodeType[] = [];
@@ -25,7 +26,10 @@ const bestFirstSearch = (
       return closedSet;
     }
 
-    const neighbors = getNeighbors(currentNode, grid);
+    const neighbors = allowDiagonal
+      ? getNeighborsForDiagonal(currentNode, grid)
+      : getNeighbors(currentNode, grid);
+
     for (let i = 0; i < neighbors.length; i++) {
       const neighbor = neighbors[i];
       if (!closedSet.includes(neighbor) && !neighbor.isWall) {

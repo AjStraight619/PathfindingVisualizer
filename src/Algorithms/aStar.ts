@@ -75,14 +75,17 @@
 
 // export default aStar;
 
+// Implementation using min-heap datastructure
 import { NodeType } from "../types/types";
 // import { getNeighbors } from "../PathFindingUtils";
 import Heap from "heap";
+import { getNeighborsForDiagonal, getNeighbors } from "../PathFindingUtils";
 
 const aStar = (
   grid: NodeType[][],
   startNode: NodeType,
-  finishNode: NodeType
+  finishNode: NodeType,
+  allowDiagonal?: boolean
 ) => {
   startNode.gScore = 0;
   startNode.fScore = heuristic(startNode, finishNode);
@@ -112,7 +115,9 @@ const aStar = (
 
     closedSet.add(currentNode);
 
-    const neighbors = getNeighbors(currentNode, grid);
+    const neighbors = allowDiagonal
+      ? getNeighborsForDiagonal(currentNode, grid)
+      : getNeighbors(currentNode, grid);
 
     for (const neighbor of neighbors) {
       if (closedSet.has(neighbor) || neighbor.isWall) {
@@ -140,17 +145,17 @@ const aStar = (
   return [];
 };
 
-const getNeighbors = (node: NodeType, grid: NodeType[][]): NodeType[] => {
-  const neighbors: NodeType[] = [];
-  const { row, col } = node;
+// const getNeighbors = (node: NodeType, grid: NodeType[][]): NodeType[] => {
+//   const neighbors: NodeType[] = [];
+//   const { row, col } = node;
 
-  if (row > 0) neighbors.push(grid[row - 1][col]);
-  if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-  if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-  if (col > 0) neighbors.push(grid[row][col - 1]);
+//   if (row > 0) neighbors.push(grid[row - 1][col]);
+//   if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
+//   if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
+//   if (col > 0) neighbors.push(grid[row][col - 1]);
 
-  return neighbors.filter((neighbor) => !neighbor.closed);
-};
+//   return neighbors.filter((neighbor) => !neighbor.closed);
+// };
 
 const heuristic = (node: NodeType, finishNode: NodeType) => {
   return (

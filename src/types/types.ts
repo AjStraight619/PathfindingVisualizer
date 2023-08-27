@@ -18,6 +18,7 @@ export type NodeType = {
   className: string;
   opened?: boolean;
   closed?: boolean;
+  // isRunning?: boolean;
 };
 
 export type NodeProps = {
@@ -32,6 +33,7 @@ export type NodeProps = {
   handleMouseUp: () => void;
   handleMouseEnter: (row: number, col: number) => void;
   handleDragEnd: (row: number, col: number) => void;
+  // isRunning: boolean;
 
   handleDragStart: (
     e: React.DragEvent,
@@ -76,7 +78,8 @@ export interface Algorithm {
   func?: (
     grid: NodeType[][],
     startNode: NodeType,
-    finishNode: NodeType
+    finishNode: NodeType,
+    allowDiagonalMovement: boolean
   ) => NodeType[];
 }
 

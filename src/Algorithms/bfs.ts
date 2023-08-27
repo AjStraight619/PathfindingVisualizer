@@ -1,10 +1,10 @@
 import { NodeType } from "../types/types";
-import { getNeighbors } from "../PathFindingUtils";
-
+import { getNeighborsForDiagonal, getNeighbors } from "../PathFindingUtils";
 const BFS = (
   grid: NodeType[][],
   startNode: NodeType,
-  finishNode: NodeType
+  finishNode: NodeType,
+  allowDiagonal: boolean
 ): NodeType[] => {
   const openSet = new Queue<NodeType>();
   const closedSet: NodeType[] = [];
@@ -26,7 +26,10 @@ const BFS = (
       return closedSet;
     }
 
-    const neighbors = getNeighbors(currentNode, grid);
+    const neighbors = allowDiagonal
+      ? getNeighborsForDiagonal(currentNode, grid)
+      : getNeighbors(currentNode, grid);
+
     for (let i = 0; i < neighbors.length; i++) {
       const neighbor = neighbors[i];
       if (!closedSet.includes(neighbor) && !neighbor.isWall) {

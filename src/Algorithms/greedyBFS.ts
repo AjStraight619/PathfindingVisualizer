@@ -1,10 +1,11 @@
 import { NodeType } from "../types/types";
-import { getNeighbors } from "../PathFindingUtils";
+import { getNeighborsForDiagonal, getNeighbors } from "../PathFindingUtils";
 
 const greedyBFS = (
   grid: NodeType[][],
   startNode: NodeType,
-  finishNode: NodeType
+  finishNode: NodeType,
+  allowDiagonal: boolean
 ): NodeType[] => {
   startNode.distance = 0;
   const openSet: NodeType[] = [];
@@ -30,7 +31,11 @@ const greedyBFS = (
     closedSet.push(currentNode);
     removeFromArray(openSet, currentNode);
 
-    const neighbors = getNeighbors(currentNode, grid);
+    const neighbors = allowDiagonal
+      ? getNeighborsForDiagonal(currentNode, grid)
+      : getNeighbors(currentNode, grid);
+
+    // const neighbors = getNeighbors(currentNode, grid);
     for (let i = 0; i < neighbors.length; i++) {
       const neighbor = neighbors[i];
       if (!closedSet.includes(neighbor) && !neighbor.isWall) {

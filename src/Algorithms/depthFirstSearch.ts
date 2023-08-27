@@ -1,17 +1,24 @@
 import { NodeType } from "../types/types";
-import { getNeighbors } from "../PathFindingUtils";
+import { getNeighborsForDiagonal, getNeighbors } from "../PathFindingUtils";
 
 // Recursive implementation
 const depthFirstSearch = (
   grid: NodeType[][],
   startNode: NodeType,
-  finishNode: NodeType
+  finishNode: NodeType,
+  allowDiagonal: boolean
 ): NodeType[] => {
   if (!startNode || !finishNode || startNode === finishNode) {
     return [];
   }
   const visitedNodesInOrder: NodeType[] = [];
-  depthFirstSearchHelper(startNode, finishNode, visitedNodesInOrder, grid);
+  depthFirstSearchHelper(
+    startNode,
+    finishNode,
+    visitedNodesInOrder,
+    grid,
+    allowDiagonal
+  );
   visitedNodesInOrder.reverse();
   return visitedNodesInOrder;
 };
@@ -20,7 +27,8 @@ function depthFirstSearchHelper(
   currentNode: NodeType,
   finishNode: NodeType,
   visitedNodesInOrder: NodeType[],
-  grid: NodeType[][]
+  grid: NodeType[][],
+  allowDiagonal: boolean
 ): boolean {
   currentNode.isVisited = true;
   visitedNodesInOrder.unshift(currentNode);
@@ -29,12 +37,21 @@ function depthFirstSearchHelper(
     return true;
   }
 
-  const unvisitedNeighbors = getNeighbors(currentNode, grid);
-  for (const neighbor of unvisitedNeighbors) {
+  const neighbors = allowDiagonal
+    ? getNeighborsForDiagonal(currentNode, grid)
+    : getNeighbors(currentNode, grid);
+
+  for (const neighbor of neighbors) {
     if (!neighbor.isVisited && !neighbor.isWall) {
       neighbor.parent = currentNode;
       if (
-        depthFirstSearchHelper(neighbor, finishNode, visitedNodesInOrder, grid)
+        depthFirstSearchHelper(
+          neighbor,
+          finishNode,
+          visitedNodesInOrder,
+          grid,
+          allowDiagonal
+        )
       ) {
         return true;
       }

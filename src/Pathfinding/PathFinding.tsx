@@ -6,7 +6,6 @@ import {
   getNewGridWithWallToggled,
   getNewGridWithMaze,
   getNewGridWithUpdatedPath,
-  FINISH_NODE_ROW,
 } from "../PathFindingUtils";
 import { NodeType, Algorithm, Maze, StartNodeStateType } from "../types/types";
 import Node from "./Node/Node";
@@ -34,8 +33,8 @@ const PathFinding = () => {
       id: "A*",
       isShortestPathAlgo: true,
       isWeighted: true,
-      func: (grid, startNode, finishNode) =>
-        aStar(grid, startNode, finishNode) || [],
+      func: (grid, startNode, finishNode, allowDiagonalMovement) =>
+        aStar(grid, startNode, finishNode, allowDiagonalMovement) || [],
     },
 
     "Beam Search": {
@@ -43,8 +42,8 @@ const PathFinding = () => {
       id: "beamSearch",
       isShortestPathAlgo: false,
       isWeighted: false,
-      func: (grid, startNode, finishNode) =>
-        beamSearch(grid, startNode, finishNode) || [],
+      func: (grid, startNode, finishNode, allowDiagonalMovement) =>
+        beamSearch(grid, startNode, finishNode, allowDiagonalMovement) || [],
     },
 
     "Best First Search": {
@@ -52,8 +51,9 @@ const PathFinding = () => {
       id: "bestFirstSearch",
       isShortestPathAlgo: false,
       isWeighted: false,
-      func: (grid, startNode, finishNode) =>
-        bestFirstSearch(grid, startNode, finishNode) || [],
+      func: (grid, startNode, finishNode, allowDiagonalMovement) =>
+        bestFirstSearch(grid, startNode, finishNode, allowDiagonalMovement) ||
+        [],
     },
 
     "Breadth-first Search": {
@@ -61,17 +61,18 @@ const PathFinding = () => {
       id: "bfs",
       isShortestPathAlgo: true,
       isWeighted: false,
-      func: (grid, startNode, finishNode) =>
-        BFS(grid, startNode, finishNode) || [],
+      func: (grid, startNode, finishNode, allowDiagonalMovement) =>
+        BFS(grid, startNode, finishNode, allowDiagonalMovement) || [],
     },
 
     "Depth First Search": {
-      name: "depthFirstSearch",
+      name: "Depth-first Search",
       id: "depthFirstSearch",
       isShortestPathAlgo: false,
       isWeighted: false,
-      func: (grid, startNode, finishNode) =>
-        depthFirstSearch(grid, startNode, finishNode) || [],
+      func: (grid, startNode, finishNode, allowDiagonalMovement) =>
+        depthFirstSearch(grid, startNode, finishNode, allowDiagonalMovement) ||
+        [],
     },
 
     Dijkstra: {
@@ -79,8 +80,8 @@ const PathFinding = () => {
       id: "Dijkstra",
       isShortestPathAlgo: true,
       isWeighted: true,
-      func: (grid, startNode, finishNode) =>
-        dijkstra(grid, startNode, finishNode) || [],
+      func: (grid, startNode, finishNode, allowDiagonalMovement) =>
+        dijkstra(grid, startNode, finishNode, allowDiagonalMovement) || [],
     },
 
     "Greedy Best-First Search": {
@@ -88,8 +89,8 @@ const PathFinding = () => {
       id: "greedyBFS",
       isShortestPathAlgo: false,
       isWeighted: true,
-      func: (grid, startNode, finishNode) =>
-        greedyBFS(grid, startNode, finishNode) || [],
+      func: (grid, startNode, finishNode, allowDiagonalMovement) =>
+        greedyBFS(grid, startNode, finishNode, allowDiagonalMovement) || [],
     },
   };
 
@@ -162,6 +163,8 @@ const PathFinding = () => {
   const [selectedMaze, setSelectedMaze] = useState<Maze[]>([]);
   const [selectedSpeed, setSelectedSpeed] = useState("Fast");
   const [hasAlgorithmRun, setHasAlgorithmRun] = useState(false);
+  const [allowDiagonalMovement, setAllowDiagonalMovement] = useState(false);
+  // const [isRunningNode, setIsRunningNode] = useState<null | NodeType>(null);
 
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
 
@@ -229,7 +232,8 @@ const PathFinding = () => {
       grid,
       updatedStartNode,
       finish,
-      algorithm.func
+      algorithm.func,
+      allowDiagonalMovement
     );
 
     // Update your React state for grid
@@ -453,6 +457,11 @@ const PathFinding = () => {
     }));
   };
 
+  const toggleAllowDiagonalMovement = () => {
+    if (visualizingAlgorithm) return;
+    setAllowDiagonalMovement((prevState) => !prevState);
+  };
+
   const visualizeAlgorithm = (algorithms: Algorithm[]): void => {
     if (comparisonMode && algorithms.length !== 2) {
       throw new Error(`Comparison mode requires exactly 2 algorithms`);
@@ -475,7 +484,12 @@ const PathFinding = () => {
         );
       }
 
-      const visitedNodesInOrder = algorithm.func(grid, start, finish);
+      const visitedNodesInOrder = algorithm.func(
+        grid,
+        start,
+        finish,
+        allowDiagonalMovement
+      );
       console.log(
         `visitedNodesInOrder for ${algorithm.name}`,
         visitedNodesInOrder
@@ -496,21 +510,60 @@ const PathFinding = () => {
     });
   };
 
+  // const animate = (
+  //   visitedNodesInOrder: NodeType[],
+  //   nodesInShortestPathOrder: NodeType[]
+  // ): void => {
+  //   for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+  //     setTimeout(() => {
+  //       if (i === visitedNodesInOrder.length) {
+  //         animateShortestPath(nodesInShortestPathOrder);
+  //         setHasAlgorithmRun(true);
+  //       } else {
+  //         const node = visitedNodesInOrder[i];
+  //         const element = document.getElementById(
+  //           `node-${node.row}-${node.col}`
+  //         );
+  //         if (element) {
+  //           if (element.classList.contains("node-weight")) {
+  //             element.className = "node node-weight node-visited";
+  //           } else {
+  //             element.className = "node node-visited";
+  //           }
+  //         }
+  //       }
+  //     }, speed * i);
+  //   }
+  // };
+
   const animate = (
     visitedNodesInOrder: NodeType[],
     nodesInShortestPathOrder: NodeType[]
   ): void => {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
       setTimeout(() => {
+        // Remove the temporary start node icon from the previous node
+        if (i > 0) {
+          const prevNode = visitedNodesInOrder[i - 1];
+          const prevElement = document.getElementById(
+            `node-${prevNode.row}-${prevNode.col}`
+          );
+          if (prevElement) {
+            prevElement.classList.remove("temp-start-icon");
+          }
+        }
+
         if (i === visitedNodesInOrder.length) {
           animateShortestPath(nodesInShortestPathOrder);
           setHasAlgorithmRun(true);
         } else {
+          // Add the temporary start node icon to the current node
           const node = visitedNodesInOrder[i];
           const element = document.getElementById(
             `node-${node.row}-${node.col}`
           );
           if (element) {
+            element.classList.add("temp-start-icon");
             if (element.classList.contains("node-weight")) {
               element.className = "node node-weight node-visited";
             } else {
@@ -612,7 +665,12 @@ const PathFinding = () => {
       // Clone the grid before passing it to the algorithm
       const gridCopy = grid.map((row) => [...row]);
 
-      const visitedNodesInOrder = algorithm.func(gridCopy, start, finish);
+      const visitedNodesInOrder = algorithm.func(
+        gridCopy,
+        start,
+        finish,
+        allowDiagonalMovement
+      );
       console.log(
         `visitedNodesInOrder for ${algorithm.name}`,
         visitedNodesInOrder
@@ -890,6 +948,8 @@ const PathFinding = () => {
           speedSelected={0}
           toggleTutorial={toggleTutorial}
           selectedSpeed={selectedSpeed}
+          toggleAllowDiagonalMovement={toggleAllowDiagonalMovement}
+          allowDiagonalMovement={allowDiagonalMovement}
         />
       </div>
       <div className="algorithm-info-container">
