@@ -75,6 +75,7 @@ export interface Algorithm {
   name: string;
   isShortestPathAlgo: boolean;
   isWeighted: boolean;
+  needsDiagonalMovement?: boolean;
   func?: (
     grid: NodeType[][],
     startNode: NodeType,

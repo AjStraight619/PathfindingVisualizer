@@ -20,6 +20,7 @@
     "bootstrap": "^5.2.3",
     "heap": "^0.2.7",
     "heap-js": "^2.3.0",
+    "pathfinding": "^0.4.18",
     "react": "^18.2.0",
     "react-bootstrap": "^2.7.4",
     "react-dom": "^18.2.0",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@types/heap": "^0.2.31",
+    "@types/pathfinding": "^0.0.6",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
     "@typescript-eslint/eslint-plugin": "^5.57.1",

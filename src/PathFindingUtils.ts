@@ -1,4 +1,5 @@
 import { NodeType } from "./types/types";
+import { getNodesInJPSShortestPathOrder } from "./Algorithms/jumpPointSearch";
 
 export const START_NODE_ROW = 19;
 export const START_NODE_COL = 8;
@@ -136,13 +137,21 @@ export const getNewGridWithUpdatedPath = (
     finish: NodeType,
     allowDiagonal: boolean
   ) => NodeType[],
-  allowDiagonal: boolean
+  allowDiagonal: boolean,
+  algorithmName: string // <-- Add this argument to specify the algorithm name
 ): [NodeType[][], NodeType[]] => {
   // Run the algorithm to get the new path
   algorithmFunc(grid, startNode, finishNode, allowDiagonal);
-  const nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
 
-  // Update the grid state here based on the new path (you could make this part more sophisticated)
+  let nodesInShortestPathOrder: NodeType[];
+
+  if (algorithmName === "jumpPointSearch") {
+    nodesInShortestPathOrder = getNodesInJPSShortestPathOrder(finishNode);
+  } else {
+    nodesInShortestPathOrder = getNodesInShortestPathOrder(finishNode);
+  }
+
+  // Update the grid state here based on the new path
   const newGrid = grid.slice();
 
   // Return the new grid state and the new shortest path for further use or animation
@@ -169,4 +178,19 @@ export const getNeighborsForDiagonal = (
   if (row < grid.length - 1 && col > 0) neighbors.push(grid[row + 1][col - 1]);
 
   return neighbors.filter((neighbor) => !neighbor.isVisited);
+};
+
+export const resetNode = (node: NodeType): void => {
+  // Preserving the row, col, isStart, isFinish, isWall, isWeight properties.
+  node.isVisited = false;
+  node.totalDistance = 0;
+  node.hScore = 0;
+  node.gScore = 0;
+  node.fScore = 0;
+  node.parent = null;
+  node.closest = Infinity;
+  node.distance = Infinity;
+  node.className = "";
+  node.opened = false;
+  node.closed = false;
 };

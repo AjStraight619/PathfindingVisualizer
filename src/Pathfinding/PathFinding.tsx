@@ -6,6 +6,7 @@ import {
   getNewGridWithWallToggled,
   getNewGridWithMaze,
   getNewGridWithUpdatedPath,
+  resetNode,
 } from "../PathFindingUtils";
 import { NodeType, Algorithm, Maze, StartNodeStateType } from "../types/types";
 import Node from "./Node/Node";
@@ -25,6 +26,8 @@ import bestFirstSearch from "../Algorithms/bestFirstSearch";
 import greedyBFS from "../Algorithms/greedyBFS";
 import { Tutorial } from "../components/Tutorial";
 import recursiveDivisionMaze from "../Mazes/recursiveDivision";
+import jumpPointSearch from "../Algorithms/jumpPointSearch";
+import { getNodesInJPSShortestPathOrder } from "../Algorithms/jumpPointSearch";
 
 const PathFinding = () => {
   const algoMapping: { [key: string]: Algorithm } = {
@@ -91,6 +94,15 @@ const PathFinding = () => {
       isWeighted: true,
       func: (grid, startNode, finishNode, allowDiagonalMovement) =>
         greedyBFS(grid, startNode, finishNode, allowDiagonalMovement) || [],
+    },
+    "Jump Point Search": {
+      name: "Jump Point Search",
+      id: "jumpPointSearch",
+      isShortestPathAlgo: true,
+      isWeighted: false,
+      needsDiagonalMovement: true,
+      func: (grid, startNode, finishNode) =>
+        jumpPointSearch(grid, startNode, finishNode) || [],
     },
   };
 
@@ -193,8 +205,16 @@ const PathFinding = () => {
       return;
     }
 
+    for (const row of grid) {
+      for (const node of row) {
+        if (!node.isStart && !node.isFinish) {
+          // Skip the start and finish nodes
+          resetNode(node);
+        }
+      }
+    }
+
     checkStartNodePosition();
-    // Your existing checks and logic
     const isValid =
       row >= 0 && row < grid.length && col >= 0 && col < grid[0].length;
 
@@ -227,16 +247,18 @@ const PathFinding = () => {
       return;
     }
 
+    console.log("algorithm: ", algorithm.name);
+
     // Using the utility function to update grid and get the new shortest path
     const [newGrid, newNodesInShortestPathOrder] = getNewGridWithUpdatedPath(
       grid,
       updatedStartNode,
       finish,
       algorithm.func,
-      allowDiagonalMovement
+      allowDiagonalMovement,
+      algorithm.name
     );
 
-    // Update your React state for grid
     setGrid(newGrid);
 
     clearVisualization();
@@ -414,21 +436,18 @@ const PathFinding = () => {
     e.preventDefault();
 
     if (!startNodeState.draggedNode) {
-      return; // Exit early if draggedNode is null or undefined
+      return;
     }
-    console.log("State of startNode when dropped", startNodeState);
 
     const { row, col } = startNodeState.draggedNode;
     const newGrid = grid.slice();
 
     newGrid[row][col].isStart = false;
-    newGrid[row][col].isDraggable = false; // Set isDraggable to false for the old node
-
-    newGrid[startNodeState.node.row][startNodeState.node.col].isStart = false;
+    newGrid[row][col].isDraggable = false;
 
     if (startNodeState.isDragging) {
       newGrid[newRow][newCol].isStart = true;
-      newGrid[newRow][newCol].isDraggable = true; // Set isDraggable to true for the new node
+      newGrid[newRow][newCol].isDraggable = true;
 
       const newStartNode = {
         ...newGrid[newRow][newCol],
@@ -439,22 +458,24 @@ const PathFinding = () => {
         className: "node-start",
       };
 
+      console.log("startNode: ", newStartNode);
+
       if (newStartNode.isWall) return;
 
-      setStartNodeState((prevState) => ({
-        ...prevState,
+      setStartNodeState({
         isDragging: false,
         draggedNode: null,
         node: newStartNode,
-      }));
+      });
+    } else {
+      setStartNodeState({
+        ...startNodeState,
+        isDragging: false,
+        draggedNode: null,
+      });
     }
 
     setGrid(newGrid);
-    setStartNodeState((prevState) => ({
-      ...prevState,
-      isDragging: false,
-      draggedNode: null,
-    }));
   };
 
   const toggleAllowDiagonalMovement = () => {
@@ -466,7 +487,16 @@ const PathFinding = () => {
     if (comparisonMode && algorithms.length !== 2) {
       throw new Error(`Comparison mode requires exactly 2 algorithms`);
     }
-    console.log("calling algo");
+
+    for (const row of grid) {
+      for (const node of row) {
+        if (!node.isStart && !node.isFinish) {
+          // Skip the start and finish nodes
+          resetNode(node);
+        }
+      }
+    }
+
     setVisualizingAlgorithm(true);
     setHasAlgorithmRun(false);
 
@@ -474,8 +504,6 @@ const PathFinding = () => {
     const finish = grid.flatMap((row) =>
       row.filter((node) => node.isFinish)
     )[0];
-
-    console.log("startNode: ", start, "finishNode: ", finish);
 
     algorithms.forEach((algorithm) => {
       if (!algorithm.func) {
@@ -499,13 +527,12 @@ const PathFinding = () => {
         setVisualizingAlgorithm(false);
         return;
       }
-
-      const nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
-      console.log(
-        `nodesInShortestPathOrder for ${algorithm.name}`,
-        nodesInShortestPathOrder
-      );
-
+      let nodesInShortestPathOrder: NodeType[];
+      if (algorithm.name === "Jump Point Search") {
+        nodesInShortestPathOrder = getNodesInJPSShortestPathOrder(finish);
+      } else {
+        nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
+      }
       animate(visitedNodesInOrder, nodesInShortestPathOrder);
     });
   };

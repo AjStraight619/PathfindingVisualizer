@@ -77,7 +77,6 @@
 
 // Implementation using min-heap datastructure
 import { NodeType } from "../types/types";
-// import { getNeighbors } from "../PathFindingUtils";
 import Heap from "heap";
 import { getNeighborsForDiagonal, getNeighbors } from "../PathFindingUtils";
 
@@ -87,6 +86,7 @@ const aStar = (
   finishNode: NodeType,
   allowDiagonal?: boolean
 ) => {
+  console.log("startNode: ", startNode);
   startNode.gScore = 0;
   startNode.fScore = heuristic(startNode, finishNode);
 
@@ -144,18 +144,6 @@ const aStar = (
   }
   return [];
 };
-
-// const getNeighbors = (node: NodeType, grid: NodeType[][]): NodeType[] => {
-//   const neighbors: NodeType[] = [];
-//   const { row, col } = node;
-
-//   if (row > 0) neighbors.push(grid[row - 1][col]);
-//   if (col < grid[0].length - 1) neighbors.push(grid[row][col + 1]);
-//   if (row < grid.length - 1) neighbors.push(grid[row + 1][col]);
-//   if (col > 0) neighbors.push(grid[row][col - 1]);
-
-//   return neighbors.filter((neighbor) => !neighbor.closed);
-// };
 
 const heuristic = (node: NodeType, finishNode: NodeType) => {
   return (
