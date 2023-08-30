@@ -393,8 +393,9 @@ const PathFinding = () => {
     col: number
   ) => {
     // Existing code
-    if (!grid[row][col].isDraggable) return;
-    if (!e || !e.dataTransfer) return;
+    if (visualizingAlgorithm) return; // do not allow dragging while visualizing algorithm
+    if (!grid[row][col].isDraggable) return; // check if node is draggable
+    if (!e || !e.dataTransfer) return; // check if dataTransfer is supported by the browser
     e.dataTransfer.setData("text/plain", "start");
 
     const nodeElement = document.getElementById(`node-${row}-${col}`);
@@ -402,7 +403,6 @@ const PathFinding = () => {
       nodeElement.classList.add("dragging", "node-dragging");
     }
 
-    // Update this part
     setStartNodeState((prevState) => ({
       ...prevState,
       isDragging: true,
@@ -510,32 +510,6 @@ const PathFinding = () => {
     });
   };
 
-  // const animate = (
-  //   visitedNodesInOrder: NodeType[],
-  //   nodesInShortestPathOrder: NodeType[]
-  // ): void => {
-  //   for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-  //     setTimeout(() => {
-  //       if (i === visitedNodesInOrder.length) {
-  //         animateShortestPath(nodesInShortestPathOrder);
-  //         setHasAlgorithmRun(true);
-  //       } else {
-  //         const node = visitedNodesInOrder[i];
-  //         const element = document.getElementById(
-  //           `node-${node.row}-${node.col}`
-  //         );
-  //         if (element) {
-  //           if (element.classList.contains("node-weight")) {
-  //             element.className = "node node-weight node-visited";
-  //           } else {
-  //             element.className = "node node-visited";
-  //           }
-  //         }
-  //       }
-  //     }, speed * i);
-  //   }
-  // };
-
   const animate = (
     visitedNodesInOrder: NodeType[],
     nodesInShortestPathOrder: NodeType[]
@@ -554,6 +528,7 @@ const PathFinding = () => {
         }
 
         if (i === visitedNodesInOrder.length) {
+          setVisualizingAlgorithm(false);
           animateShortestPath(nodesInShortestPathOrder);
           setHasAlgorithmRun(true);
         } else {

@@ -1,3 +1,5 @@
+// api for uploading own algorithms to the server
+
 export async function uploadFile(file: File) {
   const formData = new FormData();
   formData.append("myFile", file);

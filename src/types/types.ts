@@ -98,3 +98,30 @@ export type StartNodeStateType = {
   isDragging: boolean;
   draggedNode: NodeType | null;
 };
+
+export interface MyNavbarProps {
+  runAlgorithm: (selectedAlgorithms: Algorithm[]) => void;
+  algoSelection: (algo: string) => void;
+  selectedAlgorithms: Algorithm[];
+  algorithmMapping: { [key: string]: Algorithm };
+  comparisonMode: boolean;
+  isWeightToggled: boolean;
+  clearVisualization: () => void;
+  clearBoard: () => void;
+  speed: number;
+  mazeSelection: (maze: string) => void;
+  toggleWeights: () => void;
+  setSpeed: (speed: number) => void;
+  toggleComparisonMode: () => void;
+  // generatingMaze: boolean;
+  generateMaze: (mazeSelection: Maze[]) => void;
+  selectedMaze: Maze[];
+  mazeMapping: { [key: string]: Maze };
+  speedMapping: { [key: string]: number };
+  speedSelected: number;
+  speedSelection: (speed: string) => void;
+  toggleTutorial: () => void;
+  selectedSpeed: string;
+  toggleAllowDiagonalMovement: () => void;
+  allowDiagonalMovement: boolean;
+}
