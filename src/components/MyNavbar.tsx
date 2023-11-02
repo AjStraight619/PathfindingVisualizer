@@ -1,15 +1,15 @@
-import React, { useRef } from "react";
+import React from "react";
 import {
-  Navbar,
+  Button,
   Container,
   Nav,
-  Button,
   NavDropdown,
   NavLink,
+  Navbar,
 } from "react-bootstrap";
+import { FiGithub } from "react-icons/fi";
 import { BrowserRouter as Router } from "react-router-dom";
 import { MyNavbarProps } from "../types/types";
-import { uploadFile } from "../api/fileUpload";
 import "./MyNavBar.css";
 
 const MyNavbar: React.FC<MyNavbarProps> = (props) => {
@@ -35,20 +35,6 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
     toggleAllowDiagonalMovement,
     allowDiagonalMovement,
   } = props;
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleUploadClick = () => {
-    console.log("clicked upload");
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      await uploadFile(file);
-    }
-  };
 
   return (
     <Router>
@@ -145,14 +131,6 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
                 ))}
               </NavDropdown>
 
-              {/* currently debugging */}
-
-              {/* <Nav.Link onClick={toggleComparisonMode}>
-                {comparisonMode
-                  ? "Exit Comparison Mode"
-                  : "Enter Comparison Mode"}
-              </Nav.Link> */}
-
               <Nav.Link onClick={toggleAllowDiagonalMovement}>
                 {allowDiagonalMovement
                   ? "Disable Diagonal Movement"
@@ -166,27 +144,14 @@ const MyNavbar: React.FC<MyNavbarProps> = (props) => {
               <Nav.Link onClick={toggleTutorial}>Tutorial</Nav.Link>
             </Nav>
           </Navbar.Collapse>
-          <input
-            type="file"
-            id="fileInput"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
+
           <div className="ml-auto d-flex align-items-center">
-            <Button
-              variant="outline-secondary" // removes background color
-              style={{ marginRight: "20px" }} // adds space to the right
-              onClick={handleUploadClick}
-            >
-              Upload File
-            </Button>
             <Button
               target="_blank"
               href="https://github.com/AjStraight619/PathfindingVisualizer"
               className="btn btn-dark"
             >
-              Github
+              <FiGithub />
             </Button>
           </div>
         </Container>

@@ -86,7 +86,6 @@ const aStar = (
   finishNode: NodeType,
   allowDiagonal?: boolean
 ) => {
-  console.log("startNode: ", startNode);
   startNode.gScore = 0;
   startNode.fScore = heuristic(startNode, finishNode);
 

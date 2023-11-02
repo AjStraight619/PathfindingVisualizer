@@ -1,33 +1,38 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  createNode,
   getInitialGrid,
-  getNodesInShortestPathOrder,
-  getNewGridWithWeightToggled,
-  getNewGridWithWallToggled,
   getNewGridWithMaze,
   getNewGridWithUpdatedPath,
+  getNewGridWithWallToggled,
+  getNewGridWithWeightToggled,
+  getNodesInShortestPathOrder,
   resetNode,
 } from "../PathFindingUtils";
-import { NodeType, Algorithm, Maze, StartNodeStateType } from "../types/types";
+import { Algorithm, Maze, NodeType, StartNodeStateType } from "../types/types";
 import Node from "./Node/Node";
 
-import MyNavbar from "../components/MyNavbar";
 import Legend from "../components/Legend";
-import "./Pathfinding.css";
+import MyNavbar from "../components/MyNavbar";
 import "./Node/Node.css";
+import "./Pathfinding.css";
 
-import { START_NODE_COL, START_NODE_ROW } from "../PathFindingUtils";
 import aStar from "../Algorithms/aStar";
-import dijkstra from "../Algorithms/dijkstra";
-import depthFirstSearch from "../Algorithms/depthFirstSearch";
-import BFS from "../Algorithms/bfs";
 import beamSearch from "../Algorithms/beamSearch";
 import bestFirstSearch from "../Algorithms/bestFirstSearch";
+import BFS from "../Algorithms/bfs";
+import depthFirstSearch from "../Algorithms/depthFirstSearch";
+import dijkstra from "../Algorithms/dijkstra";
 import greedyBFS from "../Algorithms/greedyBFS";
-import { Tutorial } from "../components/Tutorial";
-import recursiveDivisionMaze from "../Mazes/recursiveDivision";
 import jumpPointSearch from "../Algorithms/jumpPointSearch";
-import { getNodesInJPSShortestPathOrder } from "../Algorithms/jumpPointSearch";
+import recursiveDivisionMaze from "../Mazes/recursiveDivision";
+import {
+  FINISH_NODE_COL,
+  FINISH_NODE_ROW,
+  START_NODE_COL,
+  START_NODE_ROW,
+} from "../PathFindingUtils";
+import { Tutorial } from "../components/Tutorial";
 
 const PathFinding = () => {
   const algoMapping: { [key: string]: Algorithm } = {
@@ -142,7 +147,7 @@ const PathFinding = () => {
     gScore: 0,
     fScore: 0,
     parent: null,
-    weight: 0,
+    weight: 1,
     isDraggable: false,
     closest: Infinity,
     distance: Infinity,
@@ -176,7 +181,15 @@ const PathFinding = () => {
   const [selectedSpeed, setSelectedSpeed] = useState("Fast");
   const [hasAlgorithmRun, setHasAlgorithmRun] = useState(false);
   const [allowDiagonalMovement, setAllowDiagonalMovement] = useState(false);
-  // const [isRunningNode, setIsRunningNode] = useState<null | NodeType>(null);
+
+  const [finishNodeState, setFinishNodeState] = useState({
+    node: {
+      ...createNode(FINISH_NODE_ROW, FINISH_NODE_COL),
+      isFinish: true,
+      row: FINISH_NODE_ROW,
+      col: FINISH_NODE_COL,
+    },
+  });
 
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
 
@@ -186,6 +199,7 @@ const PathFinding = () => {
     row: null,
     col: null,
   });
+
   useEffect(() => {
     const initialGrid = getInitialGrid();
     setGrid(initialGrid);
@@ -199,7 +213,6 @@ const PathFinding = () => {
     col: number
   ) => {
     e.preventDefault();
-    console.log("in onMove");
     // If not dragging the start node, do nothing
     if (!startNodeState.isDragging) {
       return;
@@ -231,27 +244,36 @@ const PathFinding = () => {
     }
   };
 
+  const resetVisitedNodes = (grid: NodeType[][]) => {
+    return grid.map((row) =>
+      row.map((node) => {
+        return { ...node, isVisited: false };
+      })
+    );
+  };
+
   const updateShortestPath = (updatedRow: number, updatedCol: number) => {
+    // Reset the isVisited property on all nodes
+    const resetGrid = resetVisitedNodes(grid);
+    setGrid(resetGrid);
+
     const updatedStartNode: NodeType = {
       ...startNodeState.node,
       row: updatedRow,
       col: updatedCol,
     };
 
-    const finish = grid.flatMap((row) =>
+    const finish = resetGrid.flatMap((row) =>
       row.filter((node) => node.isFinish)
     )[0];
     const algorithm = selectedAlgorithms[0];
     if (!algorithm || !algorithm.func) {
-      console.error("No algorithm selected or algorithm function is undefined");
       return;
     }
 
-    console.log("algorithm: ", algorithm.name);
-
     // Using the utility function to update grid and get the new shortest path
     const [newGrid, newNodesInShortestPathOrder] = getNewGridWithUpdatedPath(
-      grid,
+      resetGrid,
       updatedStartNode,
       finish,
       algorithm.func,
@@ -260,7 +282,6 @@ const PathFinding = () => {
     );
 
     setGrid(newGrid);
-
     clearVisualization();
     animateShortestPathOnStartNodeDrag(newNodesInShortestPathOrder);
   };
@@ -311,7 +332,7 @@ const PathFinding = () => {
   const handleMouseDown = (row: number, col: number) => {
     if (visualizingAlgorithm) return;
 
-    let newGrid = isWeightToggled
+    const newGrid = isWeightToggled
       ? getNewGridWithWeightToggled(grid, row, col)
       : getNewGridWithWallToggled(grid, row, col);
 
@@ -358,9 +379,6 @@ const PathFinding = () => {
   };
 
   const handleDragEnd = (row: number, col: number) => {
-    // Reset dragging state
-
-    // Reset the last known position of the dragged node
     lastPosition.current = { row: null, col: null };
 
     const newGrid = grid.slice();
@@ -414,7 +432,6 @@ const PathFinding = () => {
     row: number,
     col: number
   ) => {
-    // Existing code
     if (visualizingAlgorithm) return; // do not allow dragging while visualizing algorithm
     if (!grid[row][col].isDraggable) return; // check if node is draggable
     if (!e || !e.dataTransfer) return; // check if dataTransfer is supported by the browser
@@ -488,19 +505,11 @@ const PathFinding = () => {
       throw new Error(`Comparison mode requires exactly 2 algorithms`);
     }
 
-    for (const row of grid) {
-      for (const node of row) {
-        if (!node.isStart && !node.isFinish) {
-          // Skip the start and finish nodes
-          resetNode(node);
-        }
-      }
-    }
-
     setVisualizingAlgorithm(true);
     setHasAlgorithmRun(false);
 
-    const start = grid.flatMap((row) => row.filter((node) => node.isStart))[0];
+    const start = startNodeState.node;
+    const finishNode = finishNodeState.node;
     const finish = grid.flatMap((row) =>
       row.filter((node) => node.isFinish)
     )[0];
@@ -512,8 +521,10 @@ const PathFinding = () => {
         );
       }
 
+      const gridCopy = grid.map((row) => [...row]);
+
       const visitedNodesInOrder = algorithm.func(
-        grid,
+        gridCopy,
         start,
         finish,
         allowDiagonalMovement
@@ -529,7 +540,7 @@ const PathFinding = () => {
       }
       let nodesInShortestPathOrder: NodeType[];
       if (algorithm.name === "Jump Point Search") {
-        nodesInShortestPathOrder = getNodesInJPSShortestPathOrder(finish);
+        nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
       } else {
         nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
       }
@@ -655,8 +666,6 @@ const PathFinding = () => {
       row.filter((node) => node.isFinish)
     )[0];
 
-    console.log("startNode: ", start, "finishNode: ", finish);
-
     const paths = algorithms.map((algorithm) => {
       if (!algorithm.func) {
         throw new Error(
@@ -673,16 +682,8 @@ const PathFinding = () => {
         finish,
         allowDiagonalMovement
       );
-      console.log(
-        `visitedNodesInOrder for ${algorithm.name}`,
-        visitedNodesInOrder
-      );
 
       const nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
-      console.log(
-        `nodesInShortestPathOrder for ${algorithm.name}`,
-        nodesInShortestPathOrder
-      );
 
       return { visitedNodesInOrder, nodesInShortestPathOrder };
     });
@@ -727,14 +728,14 @@ const PathFinding = () => {
     for (let i = 0; i <= walls.length; i++) {
       if (i === walls.length) {
         setTimeout(() => {
-          let newGrid = getNewGridWithMaze(grid, walls);
+          const newGrid = getNewGridWithMaze(grid, walls);
           setGrid(newGrid);
           setGeneratingMaze(false);
         }, i * speed);
         return;
       }
-      let wall = walls[i];
-      let node = grid[wall[0]][wall[1]];
+      const wall = walls[i];
+      const node = grid[wall[0]][wall[1]];
       setTimeout(() => {
         const element = document.getElementById(`node-${node.row}-${node.col}`);
         if (element) {
@@ -900,6 +901,8 @@ const PathFinding = () => {
         node.isStart
           ? {
               ...node,
+              distance: Infinity,
+              parent: null,
               isVisited: false,
               isShortestPath: false,
               className: "node node-start",
@@ -907,12 +910,16 @@ const PathFinding = () => {
           : node.isFinish
           ? {
               ...node,
+              distance: Infinity,
+              parent: null,
               isVisited: false,
               isShortestPath: false,
               className: "node node-finish",
             }
           : {
               ...node,
+              distance: Infinity,
+              parent: null,
               isVisited: false,
               isWall: false,
               isWeight: false,
@@ -990,7 +997,7 @@ const PathFinding = () => {
             <div key={rowIndex} className="row">
               {row.map((node, nodeIndex) => {
                 const { row, col, isStart, isFinish, isWall, isWeight } = node;
-                let cellClassName = "node";
+                const cellClassName = "node";
                 let shouldFadeWeight = false;
                 if (selectedAlgorithms.length > 0) {
                   if (!selectedAlgorithms[0].isWeighted && node.isWeight) {

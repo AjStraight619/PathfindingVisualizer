@@ -1,36 +1,62 @@
 .legend-container {
-    position: fixed;
-    top: 20%;
-    right: 8%;
-    background-color: #f7f7f7;
-    border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    z-index: 100;
-  }
-  .legend-list,
-  .comparison-list {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .legend-icon {
-    display: flex;
-    align-items: center;
-    margin-left: 8px;
-  }
-  .legend-list li,
-  .comparison-list li {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-  }
+  position: fixed;
+  top: 20%;
+  right: 8%;
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  width: 200px; /* Set a fixed width, or adjust as necessary */
+}
 
-  .legend-color {
-    width: 25px;
-    height: 25px;
-    display: inline-block;
-    position: relative;
-    top: 0.35em;
-    margin-right: 8px;
-  }
+.toggle-button {
+  width: 100%;
+  background-color: #f7f7f7;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  padding: 10px;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.toggle-button.expanded {
+  background-color: #e0e0e0;
+}
+
+.toggle-button.collapsed {
+  background-color: #f7f7f7;
+}
+
+.legend-content {
+  margin-top: 10px;
+}
+
+.legend-list,
+.comparison-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.legend-icon {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.legend-list li,
+.comparison-list li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.legend-color {
+  width: 25px;
+  height: 25px;
+  display: inline-block;
+  position: relative;
+  top: 0.35em;
+  margin-right: 8px;
+}

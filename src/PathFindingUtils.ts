@@ -1,5 +1,5 @@
-import { NodeType } from "./types/types";
 import { getNodesInJPSShortestPathOrder } from "./Algorithms/jumpPointSearch";
+import { NodeType } from "./types/types";
 
 export const START_NODE_ROW = 19;
 export const START_NODE_COL = 8;
@@ -20,7 +20,7 @@ export const getInitialGrid = (): NodeType[][] => {
   return grid;
 };
 
-const createNode = (row: number, col: number): NodeType => {
+export const createNode = (row: number, col: number): NodeType => {
   const isStart = row === START_NODE_ROW && col === START_NODE_COL;
   return {
     row,
@@ -67,11 +67,11 @@ export const getNewGridWithMaze = (
   grid: NodeType[][],
   walls: [number, number][]
 ): NodeType[][] => {
-  let newGrid = grid.slice();
-  for (let wall of walls) {
-    let node = grid[wall[0]][wall[1]];
+  const newGrid = grid.slice();
+  for (const wall of walls) {
+    const node = grid[wall[0]][wall[1]];
 
-    let newNode = {
+    const newNode = {
       ...node,
       isWall: !node.isWall,
     };

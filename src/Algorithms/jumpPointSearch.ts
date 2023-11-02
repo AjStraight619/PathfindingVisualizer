@@ -7,8 +7,14 @@ const jumpPointSearch = (
   startNode: NodeType,
   finishNode: NodeType
 ): NodeType[] => {
-  console.log("startNode: ", startNode, "finishNode: ", finishNode);
-  const openSet = new Heap<NodeType>((a, b) => a.fScore - b.fScore); // Use Heap
+  finishNode.isVisited = false;
+  console.log(
+    "Logging state of start and finish nodes at the beginning of algorithm, startNode: ",
+    startNode,
+    "finishNode: ",
+    finishNode
+  );
+  const openSet = new Heap<NodeType>((a, b) => a.fScore - b.fScore);
   const closedSet = new Set<NodeType>();
   const visitedDuringJumpSet = new Set<NodeType>();
   const jumpPoints: NodeType[] = [];
@@ -19,7 +25,7 @@ const jumpPointSearch = (
   openSet.push(startNode);
 
   while (!openSet.empty()) {
-    const currentNode = openSet.pop(); // Assumes Heap's pop removes the minimum
+    const currentNode = openSet.pop();
 
     if (currentNode === undefined) continue;
     closedSet.add(currentNode);
@@ -58,7 +64,7 @@ const jumpPointSearch = (
             openSet.push(jumpNode);
             jumpNode.opened = true;
           } else {
-            openSet.updateItem(jumpNode); // Assumes Heap has an updateItem method
+            openSet.updateItem(jumpNode);
           }
         }
       }
@@ -74,7 +80,6 @@ const heuristic = (node: NodeType, endNode: NodeType): number => {
   return Math.abs(node.row - endNode.row) + Math.abs(node.col - endNode.col);
 };
 
-// Assuming that getNodesInShortestPathOrder is used to get the JPS specific shortest path
 export const getNodesInJPSShortestPathOrder = (
   finishNode: NodeType
 ): NodeType[] => {
@@ -93,15 +98,10 @@ export const getNodesInJPSShortestPathOrder = (
     currentNode = currentNode.parent ? currentNode.parent : null;
   }
 
-  // Add the finish node at the end to ensure it gets highlighted
   nodesInShortestPathOrder.push(finishNode);
 
   return nodesInShortestPathOrder;
 };
-
-// Replace the following line in your `visualizeAlgorithm` function
-// const nodesInShortestPathOrder = getNodesInShortestPathOrder(finish);
-// with
 
 export const interpolate = (start: NodeType, end: NodeType): NodeType[] => {
   const dx = end.col - start.col;
