@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  createNode,
   getInitialGrid,
   getNewGridWithMaze,
   getNewGridWithUpdatedPath,
@@ -26,12 +25,7 @@ import dijkstra from "../Algorithms/dijkstra";
 import greedyBFS from "../Algorithms/greedyBFS";
 import jumpPointSearch from "../Algorithms/jumpPointSearch";
 import recursiveDivisionMaze from "../Mazes/recursiveDivision";
-import {
-  FINISH_NODE_COL,
-  FINISH_NODE_ROW,
-  START_NODE_COL,
-  START_NODE_ROW,
-} from "../PathFindingUtils";
+import { START_NODE_COL, START_NODE_ROW } from "../PathFindingUtils";
 import { Tutorial } from "../components/Tutorial";
 
 const PathFinding = () => {
@@ -181,15 +175,6 @@ const PathFinding = () => {
   const [selectedSpeed, setSelectedSpeed] = useState("Fast");
   const [hasAlgorithmRun, setHasAlgorithmRun] = useState(false);
   const [allowDiagonalMovement, setAllowDiagonalMovement] = useState(false);
-
-  const [finishNodeState, setFinishNodeState] = useState({
-    node: {
-      ...createNode(FINISH_NODE_ROW, FINISH_NODE_COL),
-      isFinish: true,
-      row: FINISH_NODE_ROW,
-      col: FINISH_NODE_COL,
-    },
-  });
 
   const [mouseIsPressed, setMouseIsPressed] = useState(false);
 
@@ -509,7 +494,7 @@ const PathFinding = () => {
     setHasAlgorithmRun(false);
 
     const start = startNodeState.node;
-    const finishNode = finishNodeState.node;
+
     const finish = grid.flatMap((row) =>
       row.filter((node) => node.isFinish)
     )[0];
